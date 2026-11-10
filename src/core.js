@@ -1,0 +1,7 @@
+export const THEMES=['technology','care','landscape','growth','connection','discovery'];
+export function classify(text){const s=text.toLowerCase();const terms={technology:['computer','software','code','digital','technology','artificial intelligence','algorithm','internet'],care:['help','kindness','care','support','compassion','health','healing'],landscape:['mountain','nature','forest','ocean','climate','landscape','ridge','environment'],growth:['attention','growth','mindful','habit','learn','change','reflect'],connection:['friend','relationship','community','family','people','belong','love'],discovery:['science','curious','discover','question','research','explore']};let best='growth',score=0;for(const [key,words]of Object.entries(terms)){const n=words.reduce((a,w)=>a+(s.match(new RegExp('\\b'+w+'\\w*','g'))||[]).length,0);if(n>score){score=n;best=key}}return best}
+export function sentences(text){return (text.match(/[^.!?]+(?:[.!?]+[”’"']*|$)/g)||[text]).map(s=>s.trim()).filter(Boolean)}
+export function duration(text,rate=1){return Math.max(1,Math.ceil(text.trim().split(/\s+/).length/(155*rate)))}
+export function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+export function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+export function validArticle(data){return typeof data?.title==='string'&&typeof data?.text==='string'&&data.text.trim().length>0}
