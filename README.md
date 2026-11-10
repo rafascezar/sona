@@ -1,6 +1,6 @@
 # Sona / Stillwater
 
-A private personal article reader with browser text-to-speech. Built from the approved Stillwater designs and abstract motion artwork.
+A private personal article reader with ElevenLabs streaming and a cloud-synced library. Built from the approved Stillwater designs and abstract motion artwork.
 
 ## Working features
 
@@ -11,11 +11,15 @@ A private personal article reader with browser text-to-speech. Built from the ap
 - Responsive mobile and desktop layouts, keyboard playback and library backup import/export.
 - Six approved motif artwork families selected by a lightweight content keyword heuristic. Artwork is selected, not newly AI-generated for every article.
 
+## Cloud upgrade
+
+The library now syncs privately through per-user R2 snapshots, with optimistic revisions, update stamps and deletion tombstones. Existing local data migrates on first connection. Voice credentials are entered in a one-time password field, sent over HTTPS to the server, validated with ElevenLabs, and stored only in private R2 with encryption at rest. They are never returned to the client or put in localStorage. Runtime secret ELEVENLABS_API_KEY is also supported. Voice/model discovery, streamed MP3 output, content-addressed audio caching, media session metadata and sentence-aligned segments are implemented. A real connected key is still needed for audible end-to-end verification.
+
 ## Privacy and limits
 
-Library data is stored only in this browser's localStorage, not synchronized across devices. Export a JSON backup from the desktop sidebar. The hosted Site is owner-private and may show the platform's access gate; the app has no account screens.
+Library data syncs to private cloud storage and is also cached in this browser for connection failures. Export a JSON backup from the desktop sidebar. The hosted Site is owner-private and may show the platform's access gate; the app has no account screens.
 
-Narration uses the Web Speech API and device/browser-provided voices, not ElevenLabs. Available voices vary by browser and operating system; online device voices may require connectivity. Keep the page open while listening. No ElevenLabs key is configured or requested by the app.
+Narration defaults to ElevenLabs streaming after the user connects their account in the private app. Generation consumes provider credits; cached replays reuse audio. Device/browser speech remains an explicit fallback. Keep the page open while listening; cross-device read-along timing is estimated.
 
 Public URL extraction cannot bypass paywalls, logins, JavaScript-only pages, or publisher blocks. Paste text when a link cannot be imported. PDF import supports text layers; scanned PDFs require OCR elsewhere. PDF.js and Google Fonts are loaded from their public CDNs. No audio export or background/offline audio guarantee.
 

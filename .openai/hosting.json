@@ -1,1 +1,6 @@
-{"project_id":"appgprj_6af2938045c08191b8053c6fb23899ef"}
+{
+  "project_id": "appgprj_6af2938045c08191b8053c6fb23899ef",
+  "r2": {
+    "binding": "BUCKET"
+  }
+}
