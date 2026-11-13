@@ -26,3 +26,13 @@ Public URL extraction cannot bypass paywalls, logins, JavaScript-only pages, or 
 ## Development
 
 Node 24. Install with `npm install --cache /tmp/sona-npm-cache`, then `npm run build` and `npm test`. Build embeds all app assets and approved artwork in a Cloudflare Worker at `dist/server/index.js`. A small custom build is used because the Sites starter/helper files were not installed in this environment. No separate preview was launched because the managed Sites browser tool was unavailable. Tests cover the runtime DOM with mocked speech, server routes, extraction, and core functions; real audible browser playback still needs a device check.
+
+## High-quality free-tier voices
+
+Sona supports two additional bring-your-own-key providers for personal narration:
+
+- **Google Cloud Chirp 3 HD** — Google lists up to 1 million characters per month at no charge. Google Cloud requires billing to be enabled; usage over the allowance can be billed, so set a budget/quota before connecting.
+- **Azure Neural** — Azure lists 500,000 Neural characters per month on its free F0 tier. F0 has a one-request concurrency limit.
+- **ElevenLabs** remains available as an optional voice provider. Its current free plan is limited to 10,000 credits/month, roughly ten minutes, and API voice access may vary.
+
+Provider keys are validated server-side and saved only in each signed-in user's private R2 area. Audio is generated in sentence-aligned chunks and cached by provider, voice, and text, so repeated listens reuse cached MP3 files. The browser still offers its own device voices as a no-key fallback. Cloud providers require an account and a key; Sona does not include provider usage or pay overages.
