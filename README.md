@@ -31,7 +31,7 @@ Node 24. Install with `npm install --cache /tmp/sona-npm-cache`, then `npm run b
 
 Sona supports two additional bring-your-own-key providers for personal narration:
 
-- **Google Cloud Chirp 3 HD** — Google lists up to 1 million characters per month at no charge. Google Cloud requires billing to be enabled; usage over the allowance can be billed, so set a budget/quota before connecting.
+- **Google Cloud Chirp 3 HD** — reuses the Google voice connection already configured in Lire. Sona shares Lire’s 50,000-character monthly cloud TTS cap, so no second key is needed.
 - **Azure Neural** — Azure lists 500,000 Neural characters per month on its free F0 tier. F0 has a one-request concurrency limit.
 - **ElevenLabs** remains available as an optional voice provider. Its current free plan is limited to 10,000 credits/month, roughly ten minutes, and API voice access may vary.
 
