@@ -1,40 +1,77 @@
-# Sona / Stillwater
+# Sona
 
-A private personal article reader with ElevenLabs streaming and a cloud-synced library. Built from the approved Stillwater designs and abstract motion artwork.
+Sona is a private, personal reading and listening space for articles and saved text. It combines a calm reading interface, sentence-level read-along narration, a listening queue, and a cloud-synced library.
 
-## Working features
+The app is built as a Cloudflare Worker with a small HTML, CSS, and JavaScript frontend. It is currently deployed through OpenAI Sites.
 
-- Public article URL extraction through a same-origin Worker endpoint with Readability and safe redirect validation.
-- Paste text, upload TXT/Markdown/HTML, and text-based PDFs (PDF.js loaded on demand).
-- Local saved library, reading positions, finished states, bookmarks and listening queue.
-- Real device speech voices, sentence-level read-along, seek, approximate 15-second skips, speed, timer and autoplay.
-- Responsive mobile and desktop layouts, keyboard playback and library backup import/export.
-- Six approved motif artwork families selected by a lightweight content keyword heuristic. Artwork is selected, not newly AI-generated for every article.
+## Features
 
-## Cloud upgrade
+- Import public article URLs through a safe same-origin extraction endpoint.
+- Paste text or upload TXT, Markdown, HTML, and text-based PDF files.
+- Save articles, reading positions, finished states, bookmarks, and a listening queue.
+- Listen with browser voices or supported cloud narration providers.
+- Follow sentence-level read-along highlighting and use seek, skip, speed, timer, and autoplay controls.
+- Sync a private library across devices with conflict-aware snapshots.
+- Import and export library backups as JSON.
+- Use responsive layouts on desktop and mobile.
+- Display six abstract artwork themes selected from article content.
 
-The library now syncs privately through per-user R2 snapshots, with optimistic revisions, update stamps and deletion tombstones. Existing local data migrates on first connection. Voice credentials are entered in a one-time password field, sent over HTTPS to the server, validated with ElevenLabs, and stored only in private R2 with encryption at rest. They are never returned to the client or put in localStorage. Runtime secret ELEVENLABS_API_KEY is also supported. Voice/model discovery, streamed MP3 output, content-addressed audio caching, media session metadata and sentence-aligned segments are implemented. A real connected key is still needed for audible end-to-end verification.
+## Narration providers
 
-## Privacy and limits
+Sona supports:
 
-Library data syncs to private cloud storage and is also cached in this browser for connection failures. Export a JSON backup from the desktop sidebar. The hosted Site is owner-private and may show the platform's access gate; the app has no account screens.
+- Browser/device speech as a local fallback.
+- Google Cloud Chirp 3 HD through the companion Lire service and its shared quota.
+- Azure Neural voices with a user-provided key or server-side runtime credentials.
+- ElevenLabs with a user-provided key or server-side runtime credentials.
 
-Narration defaults to ElevenLabs streaming after the user connects their account in the private app. Generation consumes provider credits; cached replays reuse audio. Device/browser speech remains an explicit fallback. Keep the page open while listening; cross-device read-along timing is estimated.
+Provider credentials are validated on the server and stored in private per-user storage. They are never returned to the browser or written to `localStorage`. Generated audio is cached by provider, voice, and content so repeat listens can reuse it.
 
-Public URL extraction cannot bypass paywalls, logins, JavaScript-only pages, or publisher blocks. Paste text when a link cannot be imported. PDF import supports text layers; scanned PDFs require OCR elsewhere. PDF.js and Google Fonts are loaded from their public CDNs. No audio export or background/offline audio guarantee.
+## Project structure
 
-## Development
+```text
+src/
+  app.js       Browser application and interaction logic
+  cloud.js     Cloud library synchronization
+  core.js      Shared parsing and reading utilities
+  page.html    Application markup
+  server.js    Cloudflare Worker routes and provider integrations
+  style.css    Responsive visual system
+public/art/    Approved artwork source
+tests/         Unit and runtime tests
+build.mjs      Worker bundle and asset build
+```
 
-Node 24. Install with `npm install --cache /tmp/sona-npm-cache`, then `npm run build` and `npm test`. Build embeds all app assets and approved artwork in a Cloudflare Worker at `dist/server/index.js`. A small custom build is used because the Sites starter/helper files were not installed in this environment. No separate preview was launched because the managed Sites browser tool was unavailable. Tests cover the runtime DOM with mocked speech, server routes, extraction, and core functions; real audible browser playback still needs a device check.
+More implementation detail is available in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## High-quality free-tier voices
+## Local development
 
-Sona supports two additional bring-your-own-key providers for personal narration:
+Requirements:
 
-- **Google Cloud Chirp 3 HD** — reuses the Google voice connection already configured in Lire. Sona shares Lire’s 800,000-character monthly cloud TTS cap, so no second key is needed.
-- **Azure Neural** — Azure lists 500,000 Neural characters per month on its free F0 tier. F0 has a one-request concurrency limit.
-- **ElevenLabs** remains available as an optional voice provider. Its current free plan is limited to 10,000 credits/month, roughly ten minutes, and API voice access may vary.
+- Node.js 24
+- npm
 
-Provider keys are validated server-side and saved only in each signed-in user's private R2 area. Audio is generated in sentence-aligned chunks and cached by provider, voice, and text, so repeated listens reuse cached MP3 files. The browser still offers its own device voices as a no-key fallback. Cloud providers require an account and a key; Sona does not include provider usage or pay overages.
+Install dependencies, build, and run the test suite:
 
-Google quota safety: all Google synthesis, including legacy tickets, must proxy through Lire. Direct Google keys/fallbacks are disabled. Cache replay remains available. See Lire docs/google-tts-global-quota.md for cutover accounting and deployment prerequisites.
+```bash
+npm ci
+npm run build
+npm test
+```
+
+The build produces a deployable Cloudflare Worker at `dist/server/index.js`. Generated files in `dist/` are intentionally excluded from version control.
+
+## Privacy and limitations
+
+- Sona is designed as a personal tool; it does not include public signup, subscription, or account-management screens.
+- URL extraction cannot bypass paywalls, authentication, JavaScript-only pages, or publisher blocks.
+- PDF import supports documents with a text layer. Scanned PDFs require OCR before import.
+- Read-along timestamps are estimated rather than forced-aligned.
+- Cloud narration consumes the configured provider's quota. Cached playback does not regenerate audio.
+- Reliable background playback is not guaranteed; keep the page open while listening.
+
+## Deployment
+
+Hosting configuration lives in `.openai/hosting.json`. The source repository connected to OpenAI Sites remains the deployment source of record; this GitHub repository is the public project mirror.
+
+Do not commit API keys or provider credentials. Runtime secrets belong in the hosting environment.
