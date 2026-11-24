@@ -1,4 +1,4 @@
-# Sona
+# Sona v0.1.0
 
 Sona is a private, personal reading and listening space for articles and saved text. It combines a calm reading interface, sentence-level read-along narration, a listening queue, and a cloud-synced library.
 
@@ -43,6 +43,16 @@ build.mjs      Worker bundle and asset build
 ```
 
 More implementation detail is available in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Versioning
+
+Sona follows [Semantic Versioning](https://semver.org/). The current version is shown beside the Sona wordmark in the app, in the browser title, and in `package.json`.
+
+- Patch releases (`0.1.x`) contain fixes and small refinements.
+- Minor releases (`0.x.0`) add backward-compatible features.
+- Major releases (`x.0.0`) may introduce incompatible changes.
+
+Release notes are recorded in [CHANGELOG.md](CHANGELOG.md).
 
 ## Local development
 
