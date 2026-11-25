@@ -44,7 +44,7 @@ export function IntakeView({snapshot,dispatch}){
     <Stack gap={6} width="100%">
       <Stack gap={2}>
         <Text type="label" color="accent">BRING YOUR OWN READING</Text>
-        <Heading level={1} textWrap="balance">Add an article</Heading>
+        <Heading level={1} textWrap="balance">Import</Heading>
         <Text color="secondary">Bring a link, a document, or a few words of your own.</Text>
       </Stack>
       <SegmentedControl label="Article import method" value={importMode} onChange={mode=>dispatch({type:'set-import-mode',mode})} layout="fill" isDisabled={busy} disabledMessage="Wait for the current article to finish preparing.">

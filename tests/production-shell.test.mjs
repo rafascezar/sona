@@ -52,7 +52,8 @@ test('production entry mounts the React and Astryx navigation shell',async()=>{
   assert.equal(document.querySelector('#app'),null,'the removed legacy mount must not return');
   assert.match(document.body.textContent,/Sona/);
   assert.match(document.body.textContent,/Your library/);
-  assert.match(document.body.textContent,/Something worth/);
+  assert.match(document.body.textContent,/Your reading, with room to breathe/);
+  assert.match(document.body.textContent,/Bring your own/);
 });
 
 test('production React shell and engine-driven views stay synchronized',async()=>{

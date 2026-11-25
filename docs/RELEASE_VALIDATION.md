@@ -1,3 +1,11 @@
+# v0.10.0 validation
+
+- The interface now follows the supplied mobile audiobook references through a Sona-specific, cover-led Home, direct import shortcuts, persistent mini player, bottom navigation and portrait player layout. No ElevenReader branding or catalog content was copied.
+- All new structure uses Astryx components and tokens. Astryx Doctor passes 27 checks with zero warnings/failures.
+- Production build and all 47 automated tests pass. The production-entry harness covers the revised Home copy, mobile navigation, import routing, player controls and both media-query branches.
+- Managed preview still times out while opening its port-4173 relay in this environment, so the new mobile composition could not be visually captured here. Automated DOM checks are not counted as visual validation; inspect the published build on phone and desktop.
+- Audio, Media Session handlers, provider synthesis, private storage and Site access are unchanged. Repeat audible playback and lock-screen skips on the published UI.
+
 # v0.9.1 validation
 
 - Production desktop rendering was reviewed in the owner's authenticated Codex browser. The app frame, library lead, search/filter controls, current article, saved rows and persistent player footer rendered coherently at the captured 1234px-wide viewport.

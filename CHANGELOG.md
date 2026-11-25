@@ -2,6 +2,14 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.0] - 2026-11-25
+
+- Redesigned the mobile experience around a cover-led Home screen, prominent continue-listening card and direct text, link and file import shortcuts.
+- Added an Astryx mobile bottom navigation and persistent mini player while retaining the resizable desktop sidebar.
+- Replaced dense saved-article rows with responsive visual library cards that keep explicit open and overflow actions.
+- Reworked the player around a centered portrait cover on phones, calmer reading surface and larger primary transport control.
+- Kept the Sona content model, private cloud access, narration engine and lock-screen media behavior unchanged.
+
 ## [0.9.1] - 2026-11-25
 
 - Reflow the current-article summary and player option grid cleanly on narrow screens and at high browser zoom.

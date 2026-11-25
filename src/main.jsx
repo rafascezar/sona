@@ -8,6 +8,10 @@ import {LayerProvider} from '@astryxdesign/core/Layer';
 import {Button} from '@astryxdesign/core/Button';
 import {Stack} from '@astryxdesign/core/Stack';
 import {Layout,LayoutContent,LayoutFooter} from '@astryxdesign/core/Layout';
+import {Tab,TabList} from '@astryxdesign/core/TabList';
+import {Icon} from '@astryxdesign/core/Icon';
+import {Text} from '@astryxdesign/core/Text';
+import {useMediaQuery} from '@astryxdesign/core/hooks';
 import '@astryxdesign/core/reset.css';
 import '@astryxdesign/core/astryx.css';
 import {themes,defaultThemeSlug} from './astryx-themes.js';
@@ -37,13 +41,34 @@ function NavigationItems({current,onNavigate}){
 function SonaShell(){
   const snapshot=useSyncExternalStore(sonaController.subscribe,sonaController.getSnapshot,sonaController.getSnapshot);
   const current=snapshot.view;
+  const isDesktop=useMediaQuery('(min-width: 48rem)');
   const [isMobileNavOpen,setMobileNavOpen]=useState(false);
   const navigate=view=>{
     setMobileNavOpen(false);
     sonaController.dispatch({type:'navigate',view});
   };
   const navItems=<NavigationItems current={current} onNavigate={navigate}/>;
-  const sideNav=<SideNav resizable={{defaultWidth:288,minWidth:240,maxWidth:360,autoSaveId:'sona-side-nav'}} header={<SideNavHeading heading="Sona" subheading="v0.9.1"/>}>{navItems}</SideNav>;
+  const sideNav=<SideNav resizable={{defaultWidth:288,minWidth:240,maxWidth:360,autoSaveId:'sona-side-nav'}} header={<SideNavHeading heading="Sona" subheading="v0.10.0"/>}>{navItems}</SideNav>;
+  const footer=current!=='player'?<LayoutFooter label="Player and primary navigation" padding={2} hasDivider>
+    <Stack gap={2}>
+      {snapshot.currentArticle?<Stack direction="horizontal" gap={2} align="center" justify="between">
+        <Stack gap={.5}>
+          <Text type="label">{snapshot.currentArticle.title}</Text>
+          <Text type="supporting">{snapshot.currentArticle.source||'Your library'}</Text>
+        </Stack>
+        <Stack direction="horizontal" gap={1} align="center">
+          <Button label="Open player" isIconOnly tooltip="Open player" icon={<Icon icon="menu"/>} variant="ghost" onClick={()=>navigate('player')}/>
+          <Button label={snapshot.playback.playing?'Pause':'Play'} variant="primary" onClick={()=>sonaController.dispatch({type:'toggle-playback'})}/>
+        </Stack>
+      </Stack>:null}
+      {!isDesktop?<TabList value={current==='player'?'library':current} onChange={navigate} layout="fill" size="sm" role="navigation">
+        <Tab value="library" label="Home" icon={<Icon icon="viewColumns"/>}/>
+        <Tab value="add" label="Import" icon={<Icon icon="upload"/>}/>
+        <Tab value="queue" label="Queue" icon={<Icon icon="menu"/>}/>
+        <Tab value="voices" label="Voices" icon={<Icon icon="microphone"/>}/>
+      </TabList>:null}
+    </Stack>
+  </LayoutFooter>:null;
   return <Theme theme={themes[defaultThemeSlug]} mode="dark">
     <LayerProvider>
     <AppShell sideNav={sideNav} mobileNav={{breakpoint:'md',content:navItems,isOpen:isMobileNavOpen,onOpenChange:setMobileNavOpen}} variant="section" contentPadding={0}>
@@ -52,14 +77,7 @@ function SonaShell(){
       {current==='player'?<PlayerView snapshot={snapshot} dispatch={sonaController.dispatch}/>:null}
       {current==='queue'?<QueueView snapshot={snapshot} dispatch={sonaController.dispatch}/>:null}
       {current==='voices'?<VoicesView controller={sonaVoiceController} onNotify={message=>sonaController.dispatch({type:'notify',message})}/>:null}
-      </LayoutContent>} footer={current!=='player'&&snapshot.currentArticle?<LayoutFooter label="Current article" padding={3} hasDivider>
-        <Stack direction="horizontal" gap={2} align="center" justify="between">
-          <Button label="Open player" variant="ghost" onClick={()=>navigate('player')}/>
-          <Stack direction="horizontal" gap={2}>
-            <Button label={snapshot.playback.playing?'Pause':'Play'} onClick={()=>sonaController.dispatch({type:'toggle-playback'})}/>
-          </Stack>
-        </Stack>
-      </LayoutFooter>:null}/>
+      </LayoutContent>} footer={footer}/>
     </AppShell>
     <FeedbackHost snapshot={snapshot} dispatch={sonaController.dispatch}/>
     </LayerProvider>

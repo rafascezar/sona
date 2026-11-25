@@ -60,11 +60,11 @@ export function PlayerView({snapshot,dispatch}){
   };
   return <ViewFrame>
     <Grid columns={wide?2:1} gap={6} width="100%" align="start">
-      <Stack gap={4}>
-        <Card padding={0}><AspectRatio ratio={wide?1.25:2.8} fit="cover"><img src={artSource(article.theme)} alt=""/></AspectRatio></Card>
+      <Stack gap={4} align={wide?'start':'center'}>
+        <Card padding={0} width="100%" maxWidth={wide?'100%':'22rem'} elevation="med"><AspectRatio ratio={wide?1.25:.72} fit="cover"><img src={artSource(article.theme)} alt=""/></AspectRatio></Card>
         <Stack gap={2}>
-          <Heading level={1} textWrap="balance">{article.title}</Heading>
-          <Text color="secondary">{article.author||article.source} · {article.duration} min listen</Text>
+          <Heading level={1} textWrap="balance" justify={wide?'start':'center'}>{article.title}</Heading>
+          <Text color="secondary" justify={wide?'start':'center'}>{article.author||article.source} · {article.duration} min listen</Text>
         </Stack>
       </Stack>
       <Stack gap={4} width="100%">
@@ -72,7 +72,7 @@ export function PlayerView({snapshot,dispatch}){
         <SegmentedControlItem value="listen" label="Listen"/>
         <SegmentedControlItem value="read" label="Read along"/>
       </SegmentedControl>
-      {playback.readMode?<ReadingPassage article={article} dispatch={dispatch}/>:<Card>
+      {playback.readMode?<ReadingPassage article={article} dispatch={dispatch}/>:<Card variant="muted">
         <Stack gap={4}>
           <Text type="label" color="accent">Reading now</Text>
           <Text>{article.activeSentence||'Ready when you are.'}</Text>
@@ -81,7 +81,7 @@ export function PlayerView({snapshot,dispatch}){
       <Slider label="Article position" min={0} max={maxPosition} step={1} value={draftPosition} onChange={setDraftPosition} onChangeEnd={commitPosition} formatValue={value=>`${Math.round((value/Math.max(1,maxPosition))*100)}%`} width="100%"/>
       <Stack as="section" aria-label="Playback controls" direction="horizontal" gap={4} justify="center" align="center">
         <Stack gap={.5} align="center"><IconButton label="Back 15 seconds" tooltip="Back 15 seconds" size="lg" variant="ghost" icon={<Icon icon="chevronsLeft"/>} onClick={()=>dispatch({type:'skip',direction:-1})}/><Text type="supporting">15s</Text></Stack>
-        <Button label={playback.playing?'Pause':'Play'} variant="primary" size="lg" width="6rem" onClick={()=>dispatch({type:'toggle-playback'})}/>
+        <Button label={playback.playing?'Pause':'Play'} variant="primary" size="lg" width="8rem" onClick={()=>dispatch({type:'toggle-playback'})}/>
         <Stack gap={.5} align="center"><IconButton label="Forward 15 seconds" tooltip="Forward 15 seconds" size="lg" variant="ghost" icon={<Icon icon="chevronsRight"/>} onClick={()=>dispatch({type:'skip',direction:1})}/><Text type="supporting">15s</Text></Stack>
       </Stack>
       <Grid columns={{minWidth:240,max:2}} gap={3} width="100%">
