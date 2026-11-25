@@ -7,12 +7,12 @@ import {Item} from '@astryxdesign/core/Item';
 import {List} from '@astryxdesign/core/List';
 import {MoreMenu} from '@astryxdesign/core/MoreMenu';
 import {ProgressBar} from '@astryxdesign/core/ProgressBar';
-import {Section} from '@astryxdesign/core/Section';
 import {SegmentedControl,SegmentedControlItem} from '@astryxdesign/core/SegmentedControl';
 import {Stack} from '@astryxdesign/core/Stack';
 import {Text} from '@astryxdesign/core/Text';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {Thumbnail} from '@astryxdesign/core/Thumbnail';
+import {ViewFrame} from './ViewFrame.jsx';
 
 const artSource=theme=>`/art/${['technology','care','landscape','growth','connection','discovery'].includes(theme)?theme:'growth'}.svg`;
 
@@ -40,10 +40,13 @@ function ArticleActions({article,dispatch}){
 function CurrentArticle({article,isPlaying,dispatch}){
   return <Card>
     <Stack gap={3}>
-      <Thumbnail src={artSource(article.theme)} alt={`Abstract ${article.theme||'growth'} artwork for ${article.title}`}/>
+      <Stack direction="horizontal" gap={3} align="center">
+      <Thumbnail src={artSource(article.theme)} alt=""/>
+      <Stack gap={2}>
       <Text type="label" color="accent">{article.finished?'LISTEN AGAIN':'PICK UP WHERE YOU LEFT OFF'}</Text>
       <Heading level={2}>{article.title}</Heading>
       <Text type="supporting">{article.source||'Your library'} · {article.duration||1} min listen</Text>
+      </Stack></Stack>
       <ProgressBar label={`Reading progress for ${article.title}`} value={article.progress||0} hasValueLabel/>
       <Stack direction="horizontal" gap={2} justify="between" align="center" wrap="wrap">
         <Text type="supporting">{article.finished?'Finished':'Your place is saved'}</Text>
@@ -53,22 +56,22 @@ function CurrentArticle({article,isPlaying,dispatch}){
   </Card>;
 }
 
-export function LibraryView({snapshot,dispatch}){
+export function LibraryView({snapshot,dispatch,tools}){
   const {articles=[],query='',filter='all',currentId,playback={}}=snapshot;
   const visible=useMemo(()=>selectLibraryArticles(articles,{query,filter}),[articles,query,filter]);
   const current=articles.find(article=>article.id===currentId);
   const showCurrent=!query&&filter!=='finished'&&current;
-  return <Section variant="transparent" padding={6}>
-    <Stack gap={6} maxWidth="72rem">
+  return <ViewFrame>
+    <Stack gap={6} width="100%">
       <Stack gap={2}>
         <Text type="label" color="accent">YOUR OWN LITTLE CORNER</Text>
-        <Heading level={1} type="display-2" textWrap="balance">Something worth your time.</Heading>
-        <Text type="large" color="secondary">Your words. Your pace. A little room to take it all in.</Text>
+        <Heading level={1} textWrap="balance">Your library</Heading>
+        <Text color="secondary">Something worth your time. Your words, at your pace.</Text>
       </Stack>
       <TextInput type="search" label="Search articles" isLabelHidden value={query} onChange={value=>dispatch({type:'set-query',query:value})} placeholder="Search your articles" startIcon="search" hasClear enterKeyHint="search" width="100%"/>
-      <Stack direction="horizontal" gap={3} justify="between" align="center" wrap="wrap">
-        <SegmentedControl label="Filter library" value={filter} onChange={value=>dispatch({type:'set-filter',filter:value})}>
-          <SegmentedControlItem value="all" label="All articles"/>
+      <Stack gap={2}>
+        <SegmentedControl label="Filter library" layout="fill" value={filter} onChange={value=>dispatch({type:'set-filter',filter:value})}>
+          <SegmentedControlItem value="all" label="All"/>
           <SegmentedControlItem value="unread" label="To listen"/>
           <SegmentedControlItem value="finished" label="Finished"/>
         </SegmentedControl>
@@ -77,14 +80,15 @@ export function LibraryView({snapshot,dispatch}){
       {showCurrent?<CurrentArticle article={current} isPlaying={!!playback.playing} dispatch={dispatch}/>:null}
       <Stack gap={3}>
         <Stack direction="horizontal" gap={3} justify="between" align="center" wrap="wrap">
-          <Heading level={2}>{query?'Search results':'Saved for a good moment'}</Heading>
+          <Heading level={2}>{query?'Search results':'Saved articles'}</Heading>
           <Button label="Add article" variant="ghost" onClick={()=>dispatch({type:'navigate',view:'add'})}/>
         </Stack>
         {visible.length?<List hasDividers edge="outset" density="balanced">
-          {visible.map(article=><Item key={article.id} label={article.title} description={`${article.source||'Your library'} · ${article.duration||1} min${article.finished?' · Finished':''}`} startContent={<Thumbnail src={artSource(article.theme)} alt=""/>} onClick={()=>dispatch({type:'open-article',id:article.id})} endContent={<ArticleActions article={article} dispatch={dispatch}/>}/>) }
+          {visible.map(article=><Item key={article.id} label={article.title} labelLines={2} description={`${article.source||'Your library'} · ${article.duration||1} min${article.finished?' · Finished':''}`} startContent={<Thumbnail src={artSource(article.theme)} alt=""/>} onClick={()=>dispatch({type:'open-article',id:article.id})} endContent={<ArticleActions article={article} dispatch={dispatch}/>}/>) }
         </List>:<EmptyState headingLevel={3} title={query?'Nothing here just yet.':'Your library starts here.'} description={query?'Try another title or source.':'Paste a link or bring your own words.'} actions={<Button label={query?'Clear search':'Add your first article'} variant="primary" onClick={()=>dispatch(query?{type:'set-query',query:''}:{type:'navigate',view:'add'})}/>}/>} 
       </Stack>
       <Text type="supporting">Five short Sona originals are included to try the player. Add your own reading whenever you’re ready.</Text>
+      {tools}
     </Stack>
-  </Section>;
+  </ViewFrame>;
 }

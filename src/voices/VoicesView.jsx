@@ -16,6 +16,7 @@ import {Tab,TabList} from '@astryxdesign/core/TabList';
 import {Text} from '@astryxdesign/core/Text';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {assertVoiceController,normalizeVoiceSnapshot,VOICE_PROVIDERS} from './voice-controller-contract.js';
+import {ViewFrame} from '../react/ViewFrame.jsx';
 
 const labels={google:'Google',azure:'Azure',eleven:'ElevenLabs',device:'On device'};
 const titles={google:'Google Chirp 3 HD',azure:'Azure Neural',eleven:'ElevenLabs',device:'Device voices'};
@@ -91,7 +92,7 @@ export function VoicesView({controller,onNotify}){
     catch(cause){onNotify?.(cause.message||'Could not disconnect provider.','error');}
     finally{setDisconnecting(false);}
   };
-  return <Stack as="section" gap={5} padding={6}>
+  return <ViewFrame width={800}><Stack as="section" gap={5} width="100%">
     <Stack gap={1}>
       <Heading level={1}>Voices</Heading>
       <Text as="p" color="secondary">Find the voice that makes you want to stay with the story.</Text>
@@ -99,7 +100,7 @@ export function VoicesView({controller,onNotify}){
     <TabList value={provider} onChange={chooseProvider} role="tablist" overflow="auto" hasDivider>
       {VOICE_PROVIDERS.map(id=><Tab key={id} value={id} label={labels[id]} panelId={`voice-panel-${id}`} endContent={<StatusDot variant={snapshot.providers[id].isConnected?'success':'neutral'} label={snapshot.providers[id].isConnected?'Connected':'Not connected'}/>}/>) }
     </TabList>
-    <Stack as="section" id={`voice-panel-${provider}`} role="tabpanel" gap={4}>
+    <Stack as="section" id={`voice-panel-${provider}`} role="tabpanel" aria-label={`${titles[provider]} voices`} gap={4}>
       <Card>
         <Stack gap={2}>
           <Heading level={2}>{titles[provider]}</Heading>
@@ -117,6 +118,6 @@ export function VoicesView({controller,onNotify}){
     </Stack>
     {connectProvider?<ConnectDialog provider={connectProvider} isOpen onOpenChange={open=>!open&&setConnectProvider('')} controller={safeController} onNotify={onNotify}/>:null}
     <AlertDialog isOpen={Boolean(disconnectProvider)} onOpenChange={open=>!open&&setDisconnectProvider('')} title={`Disconnect ${disconnectProvider?titles[disconnectProvider]:'voice provider'}?`} description="Current provider voices will become unavailable. You can reconnect later." actionLabel="Disconnect" onAction={confirmDisconnect} isActionLoading={isDisconnecting}/>
-  </Stack>;
+  </Stack></ViewFrame>;
 }
 

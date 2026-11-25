@@ -2,6 +2,16 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] - 2026-11-25
+
+- Reorganized the React/Astryx views around a shared padded content frame, with narrower import forms and a persistent compact player footer.
+- Replaced oversized display headings and wrapping text transport buttons with regular page headings and named icon controls for 15-second skips.
+- Added compact mobile artwork and a two-column player on wide screens; grouped speed, sleep timer, bookmark and voice controls.
+- Moved backup and sync tools into a collapsed library section and simplified queue actions.
+- Raised desktop reading text to 16 through the official Astryx theme editor; preserved its touch-device typography adaptation.
+- Added page-title focus on navigation and announced bookmark toggle state. Production DOM tests cover named controls, slider labels and a single main landmark under both breakpoint branches.
+- Audio behavior remains the v0.8.1 implementation. Live responsive, keyboard and screen-reader review remains pending because browser access and preview infrastructure were unavailable.
+
 ## [0.8.1] - 2026-11-24
 
 - Lock-screen and in-app skip controls now seek in media seconds within the loaded audio instead of estimating a number of sentences and replacing the audio source.

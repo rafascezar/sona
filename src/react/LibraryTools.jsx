@@ -1,11 +1,11 @@
 import React,{useState} from 'react';
 import {Button} from '@astryxdesign/core/Button';
-import {Card} from '@astryxdesign/core/Card';
 import {FileInput} from '@astryxdesign/core/FileInput';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Stack} from '@astryxdesign/core/Stack';
 import {StatusDot} from '@astryxdesign/core/StatusDot';
 import {Text} from '@astryxdesign/core/Text';
+import {Collapsible} from '@astryxdesign/core/Collapsible';
 
 const MAX_BACKUP_SIZE=15*1024*1024;
 
@@ -25,7 +25,7 @@ export function LibraryTools({snapshot,dispatch}){
     if(file)dispatch({type:'import-backup',file});
   };
 
-  return <Card>
+  return <Collapsible trigger="Library tools & backup" defaultIsOpen={false}>
     <Stack as="section" gap={4} aria-labelledby="library-tools-title">
       <Stack gap={1}>
         <Heading id="library-tools-title" level={2}>Library tools</Heading>
@@ -46,5 +46,5 @@ export function LibraryTools({snapshot,dispatch}){
         placeholder="Choose a backup file"
       />
     </Stack>
-  </Card>;
+  </Collapsible>;
 }

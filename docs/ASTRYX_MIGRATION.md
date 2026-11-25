@@ -109,7 +109,8 @@ Exit criteria:
 
 ## Remaining release checks
 
-- Repeat audible Chrome/iPhone playback after the v0.8.0 engine extraction (v0.7.2 was confirmed by the owner).
-- Test lock-screen controls, interruption recovery, background playback and audio-route changes on physical devices.
+- Owner confirmed audible mobile playback after migration and working lock-screen skips in v0.8.1.
+- v0.9.0 reorganizes the responsive layouts and improves semantic controls; final live visual and accessibility review is still pending.
+- Test interruption recovery and audio-route changes on physical devices, and repeat background playback after the UI changes.
 - DOM integration tests cannot establish responsive layout, focus trapping, visual contrast or audible output; record browser and physical-device results separately.
 - Retain the 0.x version until these release checks are complete. The implementation milestones above do not imply that every physical-device scenario has been verified.

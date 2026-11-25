@@ -1,3 +1,13 @@
+# v0.9.0 validation
+
+- Production build and all 47 automated tests passed; Astryx Doctor passed 27 checks with zero warnings/failures. TypeScript prop checking remains informational because TypeScript is not installed.
+- The production-entry DOM harness checks navigation, a single main landmark and page heading, route-title focusability, labelled transport/slider controls, bookmark toggle state and collapsed saved passages. Both narrow and wide media-query branches run; this is not a browser layout or keyboard test.
+- The shared frame now uses LayoutContent to apply the Layout padding, while the outer Layout owns the scroll region and persistent player footer. Artwork and player columns adapt at the wide breakpoint.
+- Desktop base reading size is 16 through the official theme editor. Theme outputs are current according to Doctor. The theme screenshot command produced an organization-blocked page rather than rendered component previews, so it did not verify typography or contrast visually.
+- Managed preview previously failed with a port-4173 relay readiness timeout. The hosted review browser still reached the sign-in page after the owner reported login; its session was separate from the owner's client. Opening the Cloud Desktop viewer also reported that no available Cloud environment was attached.
+- Live mobile/desktop layout, 200% zoom, keyboard focus visibility/order, dialog focus trapping, screen readers and real-device touch targets remain pending. This release improves the implementation and semantic regression coverage; it does not complete visual/accessibility sign-off.
+- Audio engine changes are limited to its displayed version. Existing iOS audio-prime, cached seek and Media Session regression tests remain passing. The owner confirmed working audible playback and lock-screen skips before this UI release; repeat these on the deployed UI.
+
 # v0.8.1 validation
 
 - Build and all 45 automated tests passed; Astryx Doctor passed 27 checks with zero warnings/failures.

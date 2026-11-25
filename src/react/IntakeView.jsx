@@ -5,12 +5,12 @@ import {Card} from '@astryxdesign/core/Card';
 import {FileInput} from '@astryxdesign/core/FileInput';
 import {FormLayout} from '@astryxdesign/core/FormLayout';
 import {Heading} from '@astryxdesign/core/Heading';
-import {Section} from '@astryxdesign/core/Section';
 import {SegmentedControl,SegmentedControlItem} from '@astryxdesign/core/SegmentedControl';
 import {Stack} from '@astryxdesign/core/Stack';
 import {Text} from '@astryxdesign/core/Text';
 import {TextArea} from '@astryxdesign/core/TextArea';
 import {TextInput} from '@astryxdesign/core/TextInput';
+import {ViewFrame} from './ViewFrame.jsx';
 
 const MAX_FILE_SIZE=15*1024*1024;
 
@@ -40,17 +40,17 @@ export function IntakeView({snapshot,dispatch}){
     event.preventDefault();
     dispatch({type:'submit-import',mode:importMode,url,title,text,file});
   };
-  return <Section variant="transparent" padding={6}>
-    <Stack gap={6} maxWidth="60rem">
+  return <ViewFrame width={640}>
+    <Stack gap={6} width="100%">
       <Stack gap={2}>
         <Text type="label" color="accent">BRING YOUR OWN READING</Text>
-        <Heading level={1} type="display-2" textWrap="balance">Bring something good.</Heading>
-        <Text type="large" color="secondary">A link, a document, a few words of your own. We’ll give them room to be heard.</Text>
+        <Heading level={1} textWrap="balance">Add an article</Heading>
+        <Text color="secondary">Bring a link, a document, or a few words of your own.</Text>
       </Stack>
       <SegmentedControl label="Article import method" value={importMode} onChange={mode=>dispatch({type:'set-import-mode',mode})} layout="fill" isDisabled={busy} disabledMessage="Wait for the current article to finish preparing.">
-        <SegmentedControlItem value="url" label="Paste a link"/>
-        <SegmentedControlItem value="text" label="Paste text"/>
-        <SegmentedControlItem value="file" label="Upload file"/>
+        <SegmentedControlItem value="url" label="Link"/>
+        <SegmentedControlItem value="text" label="Text"/>
+        <SegmentedControlItem value="file" label="File"/>
       </SegmentedControl>
       <form onSubmit={submit} aria-busy={busy}>
         <Stack gap={4}>
@@ -69,5 +69,5 @@ export function IntakeView({snapshot,dispatch}){
       <Preview preview={preview} dispatch={dispatch}/>
       <Banner status="info" title="Your library stays with you" description="Your library syncs privately across your devices. A local backup keeps your reading safe while offline."/>
     </Stack>
-  </Section>;
+  </ViewFrame>;
 }

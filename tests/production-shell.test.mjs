@@ -4,13 +4,15 @@ import vm from 'node:vm';
 import {parseHTML} from 'linkedom';
 import {build} from 'esbuild';
 
-async function productionApp(){
+async function productionApp({wide=false}={}){
   const {document,window}=parseHTML('<!doctype html><html><head></head><body><div id="root"></div></body></html>');
+  document.hasFocus=()=>true;
   const memory=new Map();
   const localStorage={getItem:key=>memory.get(key)||null,setItem:(key,value)=>memory.set(key,String(value)),removeItem:key=>memory.delete(key)};
   const speechSynthesis={getVoices:()=>[],cancel:()=>{},speak:()=>{},addEventListener:()=>{},removeEventListener:()=>{}};
   const raf=callback=>{const timer=setTimeout(()=>callback(Date.now()),0);timer.unref?.();return timer};
   const CSS={supports:()=>false,escape:value=>String(value)};
+  window.matchMedia=query=>({matches:query.includes('min-width: 64rem')&&wide,media:query,addEventListener(){},removeEventListener(){}});
   Object.assign(window,{CSS,speechSynthesis,scrollTo:()=>{},fetch:async()=>Response.json({error:'Unavailable'},{status:503}),requestAnimationFrame:raf,cancelAnimationFrame:clearTimeout,getComputedStyle:()=>({direction:'ltr',writingMode:'horizontal-tb',overflowX:'visible',overflowY:'visible'})});
   Object.assign(window.navigator,{mediaSession:{setActionHandler:()=>{}},userAgent:'node'});
   const context={
@@ -61,7 +63,7 @@ test('production React shell and engine-driven views stay synchronized',async()=
   add.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
   await new Promise(resolve=>setTimeout(resolve,0));
   assert.ok(document.querySelector('form'));
-  assert.match(document.body.textContent,/Paste text|From a URL|Choose a file/i);
+  assert.ok(document.querySelector('input[type="url"]'),'URL import remains labelled and available');
 
   item('Listening queue').dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
   await new Promise(resolve=>setTimeout(resolve,0));
@@ -73,4 +75,30 @@ test('production React shell and engine-driven views stay synchronized',async()=
   await new Promise(resolve=>setTimeout(resolve,0));
   assert.match(document.body.textContent,/Voices|narrator/i);
   assert.equal(item('Voices').getAttribute('aria-current'),'page');
+});
+
+for(const wide of [false,true])test(`player has named controls and one main heading with ${wide?'wide':'narrow'} breakpoint`,async()=>{
+  const {document,window}=await productionApp({wide});
+  const click=label=>{
+    const control=[...document.querySelectorAll('button')].find(node=>node.textContent.trim()===label||node.getAttribute('aria-label')===label);
+    assert.ok(control,`Missing ${label}`);
+    control.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
+    return control;
+  };
+  click('Open player');
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(document.querySelectorAll('main,[role="main"]').length,1);
+  assert.equal(document.querySelectorAll('h1').length,1);
+  assert.match(document.querySelector('h1').textContent,/The art of paying attention/);
+  assert.equal(document.querySelector('h1').tabIndex,-1,'Page title can receive route-change focus');
+  const transport=document.querySelector('section[aria-label="Playback controls"]');
+  assert.ok(transport);
+  assert.equal(transport.querySelectorAll('button').length,3);
+  assert.ok(transport.querySelector('button[aria-label="Back 15 seconds"]'));
+  assert.ok(transport.querySelector('button[aria-label="Forward 15 seconds"]'));
+  assert.ok(document.querySelector('[role="slider"][aria-label="Article position"]')||document.querySelector('[role="slider"][aria-labelledby]'));
+  click('Bookmark');
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.ok(document.querySelector('button[aria-pressed="true"]'),'Bookmark state is announced independently of color');
+  assert.ok(document.querySelector('button[aria-expanded="false"]'),'Saved passages remain collapsible');
 });
