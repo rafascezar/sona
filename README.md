@@ -1,4 +1,4 @@
-# Sona v0.2.0
+# Sona v0.3.0
 
 Sona is a private, personal reading and listening space for articles and saved text. It combines a calm reading interface, sentence-level read-along narration, a listening queue, and a cloud-synced library.
 

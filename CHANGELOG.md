@@ -2,6 +2,20 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-11-24
+
+### Added
+
+- Astryx AppShell, SideNav, and automatic mobile navigation.
+- A tested event bridge between React navigation and the existing Sona view engine.
+- Accessible selected-page state and mobile drawer behavior.
+
+### Changed
+
+- Desktop and mobile navigation are now owned by React/Astryx.
+- The legacy renderer now owns only page content, playback, and feature behavior.
+- The playback dock is centered within the Astryx application shell.
+
 ## [0.2.0] - 2026-11-24
 
 ### Added

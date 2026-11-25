@@ -32,7 +32,7 @@ Exit criteria:
 
 ## Phase 2 — Application frame and navigation
 
-Status: planned
+Status: **complete**
 
 Goals:
 
