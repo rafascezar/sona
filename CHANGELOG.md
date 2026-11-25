@@ -2,6 +2,13 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.7.1] - 2026-11-24
+
+- Added HTTP byte-range responses for Google, Azure, and ElevenLabs narration so Safari/iOS can open ticketed audio reliably.
+- Added `Accept-Ranges`, `Content-Range`, and accurate partial-content lengths for cached and newly generated audio.
+- Enabled inline mobile playback and made audio cleanup tolerant of Safari media-element exceptions.
+- Added a regression test for Safari-style `Range: bytes=0-2` requests.
+
 ## [0.7.0] - 2026-11-24
 
 ### Added
