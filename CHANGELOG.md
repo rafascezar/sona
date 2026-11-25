@@ -2,6 +2,12 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.1] - 2026-11-25
+
+- Keep the loaded narration segment and exact position when pausing and resuming from the app or lock screen.
+- Cancel narration preparation when Pause is pressed before audio starts, preventing delayed unwanted playback.
+- Register the active cloud-audio segment so Media Session position and in-app seeking use the current audio timeline.
+
 ## [0.2.0] - 2026-11-25
 
 - Restored the pre-Astryx vanilla Sona interface as the active product line.

@@ -26,6 +26,14 @@ test('production bundle contains the restored vanilla Sona application',async()=
   assert.match(style,/\.desktop-sidebar|--bg/);
 });
 
+test('vanilla player preserves loaded audio and cancels a pending play on pause',async()=>{
+  const source=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
+  assert.match(source,/activeSegment=\{\.\.\.segment,url:audio\.src,articleId:startId/);
+  assert.match(source,/if\(playing&&audioLoading\)\{stopSpeech\(\);persist\(\);render\(\)\}/);
+  assert.match(source,/setActionHandler\('pause',\(\)=>\{if\(audioLoading\)\{stopSpeech\(\);persist\(\);render\(\)\}/);
+  assert.match(source,/if\(hasPremiumAudio\(\)&&!audio\.ended\).*await audio\.play\(\)/);
+});
+
 test('URL importer rejects private targets and invalid origins',async()=>{
   for(const url of ['http://127.0.0.1/x','http://192.168.1.1/x','file:///etc/passwd','http://localhost/x','http://[::1]/']){
     const response=await worker.fetch(new Request('https://sona.test/api/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})}));
