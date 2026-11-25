@@ -10,6 +10,7 @@ import {sonaTheme} from './themes/sona/sona.js';
 import './themes/sona/sona.fonts.css';
 import './themes/sona/sona.css';
 import {sonaController} from './sona-controller.js';
+import {Phase3Surface} from './react/Phase3Surface.jsx';
 
 const destinations=[
   {id:'library',label:'Your library'},
@@ -36,7 +37,8 @@ function SonaShell(){
   const sideNav=<SideNav resizable={{defaultWidth:288,minWidth:240,maxWidth:360,autoSaveId:'sona-side-nav'}} header={<SideNavHeading heading="Sona" subheading="v0.4.0 · a quieter kind of listening"/>}>{navItems}</SideNav>;
   return <Theme theme={sonaTheme} mode="dark">
     <AppShell sideNav={sideNav} mobileNav={{breakpoint:'md',content:navItems,isOpen:isMobileNavOpen,onOpenChange:setMobileNavOpen}} variant="section" contentPadding={0}>
-      <section id="app" data-ui-system="astryx" data-migration-phase="controller" />
+      {['library','add'].includes(current)?<Phase3Surface snapshot={snapshot} dispatch={sonaController.dispatch}/>:null}
+      <section id="app" hidden={['library','add'].includes(current)} data-ui-system="astryx" data-migration-phase="intake" />
     </AppShell>
     <output id="toast" role="status" aria-live="polite" />
     <section id="modal-root" />

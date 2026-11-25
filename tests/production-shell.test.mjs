@@ -51,7 +51,7 @@ test('production entry mounts the React and Astryx navigation shell',async()=>{
   const {document}=await productionApp();
   assert.equal(document.querySelectorAll('#root').length,1);
   assert.equal(document.querySelectorAll('[data-ui-system="astryx"]').length,1);
-  assert.equal(document.querySelector('[data-ui-system="astryx"]').dataset.migrationPhase,'controller');
+  assert.equal(document.querySelector('[data-ui-system="astryx"]').dataset.migrationPhase,'intake');
   assert.match(document.body.textContent,/Sona/);
   assert.match(document.body.textContent,/Your library/);
   assert.match(document.querySelector('#app').textContent,/Something worth/);
