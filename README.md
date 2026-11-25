@@ -1,8 +1,8 @@
-# Sona v0.10.0
+# Sona v0.2.0
 
 Sona is a private, personal reading and listening space for articles and saved text. It combines a calm reading interface, sentence-level read-along narration, a listening queue, and a cloud-synced library.
 
-The app uses React 19 and the Astryx component library, bundled into a Cloudflare Worker and deployed through OpenAI Sites.
+The current app uses the original vanilla JavaScript interface, bundled into a Cloudflare Worker and deployed through OpenAI Sites. The former React/Astryx experiment is preserved separately at the `sona-astryx-v0.1.0` tag and `releases/sona-v0.1.0-astryx` branch.
 
 ## Features
 
@@ -31,12 +31,8 @@ Provider credentials are validated on the server and stored in private per-user 
 
 ```text
 src/
-  main.jsx     React/Astryx application shell
-  sona-engine.js Independent browser engine
-  sona-controller.js Immutable snapshots and semantic commands
-  react/       Library, intake, player, queue, feedback and tools
-  voices/      Voice UI and sanitized provider contract
-  themes/sona/ Generated Sona Astryx theme
+  app.js       Vanilla application interface and playback behavior
+  sona-controller.js Small navigation/controller bridge
   cloud.js     Private library and narration API routes
   core.js      Shared parsing and reading utilities
   page.html    Application markup
@@ -47,7 +43,6 @@ build.mjs      Worker bundle and asset build
 ```
 
 More implementation detail is available in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-The progressive React/Astryx work is tracked in [docs/ASTRYX_MIGRATION.md](docs/ASTRYX_MIGRATION.md).
 
 ## Versioning
 
@@ -72,10 +67,9 @@ Install dependencies, build, and run the test suite:
 npm ci
 npm run build
 npm test
-npm run astryx:doctor
 ```
 
-For a local browser preview, run `npm run dev` after building. Local preview has no private R2 binding; cloud providers are exercised on the hosted Site. Rebuild after source changes.
+Local preview has no private R2 binding; cloud providers are exercised on the hosted Site. Rebuild after source changes.
 
 The build produces a deployable Cloudflare Worker at `dist/server/index.js`. Generated files in `dist/` are intentionally excluded from version control.
 
@@ -86,7 +80,7 @@ The build produces a deployable Cloudflare Worker at `dist/server/index.js`. Gen
 - PDF import supports documents with a text layer. Scanned PDFs require OCR before import.
 - Read-along timestamps are estimated rather than forced-aligned.
 - Cloud narration consumes the configured provider's quota. Cached playback does not regenerate audio.
-- Reliable background playback is not guaranteed; keep the page open while listening.
+- iPhone playback is unlocked by the initiating gesture, and Media Session controls seek the loaded cloud audio in real seconds.
 
 ## Deployment
 

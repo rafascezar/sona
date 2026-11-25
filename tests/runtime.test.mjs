@@ -16,15 +16,14 @@ test('worker serves the versioned app, bundled style and approved artwork',async
   }
 });
 
-test('production bundle contains React/Astryx without the removed legacy mount',async()=>{
+test('production bundle contains the restored vanilla Sona application',async()=>{
   const html=await(await worker.fetch(new Request('https://sona.test/'))).text();
   const script=await(await worker.fetch(new Request('https://sona.test/app.js'))).text();
   const style=await(await worker.fetch(new Request('https://sona.test/style.css'))).text();
-  assert.match(html,/id="root"/);
-  assert.match(script,/useSyncExternalStore/);
-  assert.doesNotMatch(script,/sona:navigate/);
+  assert.match(html,/id="app"/);
+  assert.doesNotMatch(script,/useSyncExternalStore/);
   assert.match(script,/Your library/);
-  assert.match(style,/astryx-base|--color-background/);
+  assert.match(style,/\.desktop-sidebar|--bg/);
 });
 
 test('URL importer rejects private targets and invalid origins',async()=>{

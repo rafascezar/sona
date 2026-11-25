@@ -2,6 +2,18 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-11-25
+
+- Restored the pre-Astryx vanilla Sona interface as the active product line.
+- Preserved Safari byte-range audio delivery and synchronous iPhone playback unlocking.
+- Kept lock-screen and in-app 15-second controls on the loaded audio timeline, with pause/resume retaining the current source.
+- Preserved private cloud access, provider credentials, library sync, import and backup behavior.
+- Archived the React/Astryx design experiment as `sona-astryx-v0.1.0` without publishing it as the current app.
+
+### Archived Astryx development history
+
+The entries below document the experimental React/Astryx line and are retained for reference; they are not newer than the current vanilla v0.2.0 product line.
+
 ## [0.10.0] - 2026-11-25
 
 - Redesigned the mobile experience around a cover-led Home screen, prominent continue-listening card and direct text, link and file import shortcuts.
