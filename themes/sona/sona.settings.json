@@ -1,0 +1,124 @@
+{
+  "name": "sona",
+  "like": "neutral",
+  "mode": "both",
+  "settings": [
+    {
+      "thing": "--color-background-body",
+      "value": "#171819",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "background-color",
+      "value": "#171819",
+      "source": "property",
+      "on": "app-shell",
+      "mode": "dark"
+    },
+    {
+      "thing": "background-color",
+      "value": "#202122",
+      "source": "property",
+      "on": "app-shell-sidenav",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-text-primary",
+      "value": "#f2f0eb",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-text-secondary",
+      "value": "#a0a0a3",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "spacing",
+      "value": "roomy",
+      "source": "dial"
+    },
+    {
+      "thing": "corners",
+      "value": "large",
+      "source": "dial"
+    },
+    {
+      "thing": "font-size",
+      "value": "1rem",
+      "source": "property",
+      "on": "side-nav-item"
+    },
+    {
+      "thing": "spacing",
+      "value": "spacious",
+      "source": "dial",
+      "on": "side-nav-item"
+    },
+    {
+      "thing": "corners",
+      "value": "round",
+      "source": "dial",
+      "on": "side-nav-item"
+    },
+    {
+      "thing": "background-color",
+      "value": "#303133",
+      "source": "property",
+      "on": "side-nav-item",
+      "state": "selected",
+      "mode": "dark"
+    },
+    {
+      "thing": "--text-large-size",
+      "value": "1.328rem",
+      "source": "token",
+      "on": "side-nav-heading"
+    },
+    {
+      "thing": "--font-weight-semibold",
+      "value": "600",
+      "source": "token",
+      "on": "side-nav-heading"
+    },
+    {
+      "thing": "accent",
+      "value": "#808e80",
+      "source": "dial"
+    },
+    {
+      "thing": "color",
+      "value": "#ffffff",
+      "source": "property",
+      "on": "toast",
+      "when": "type:error",
+      "mode": "dark"
+    },
+    {
+      "thing": "background-color",
+      "value": "#6e7a6e",
+      "source": "property",
+      "on": "progress-bar-fill",
+      "mode": "light"
+    },
+    {
+      "thing": "background-color",
+      "value": "#99a599",
+      "source": "property",
+      "on": "progress-bar-fill",
+      "mode": "dark"
+    },
+    {
+      "thing": "color",
+      "value": "#c7c7c7",
+      "source": "property",
+      "on": "toast",
+      "when": "type:error",
+      "mode": "light"
+    }
+  ],
+  "lifted": [],
+  "palette": "3ab5166ae11e31318b07e5acce5ec900d0ca74b69514210649a09eb9c4721623"
+}

@@ -48,13 +48,14 @@ Exit criteria:
 
 ## Phase 3 — Library and content intake
 
-Status: planned
+Status: **in progress (v0.4.0 controller foundation)**
 
 Goals:
 
 - Migrate the library to Astryx `List`, `Item`, `Section`, `Heading`, and `Text` primitives.
 - Migrate search, filters, empty states, article actions, and import forms.
 - Preserve article artwork and Sona’s quiet visual identity through a custom Astryx theme.
+- Route React and the existing engines through an immutable `useSyncExternalStore` controller without browser-wide state events.
 
 Exit criteria:
 

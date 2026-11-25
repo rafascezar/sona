@@ -1,14 +1,15 @@
-import React,{useEffect,useState} from 'react';
+import React,{useSyncExternalStore,useState} from 'react';
 import {flushSync} from 'react-dom';
 import {createRoot} from 'react-dom/client';
 import {AppShell} from '@astryxdesign/core/AppShell';
 import {SideNav,SideNavHeading,SideNavItem,SideNavSection} from '@astryxdesign/core/SideNav';
 import {Theme} from '@astryxdesign/core/theme';
-import {neutralTheme} from '@astryxdesign/theme-neutral/built';
-import '@astryxdesign/theme-neutral/fonts.css';
 import '@astryxdesign/core/reset.css';
 import '@astryxdesign/core/astryx.css';
-import '@astryxdesign/theme-neutral/theme.css';
+import {sonaTheme} from './themes/sona/sona.js';
+import './themes/sona/sona.fonts.css';
+import './themes/sona/sona.css';
+import {sonaController} from './sona-controller.js';
 
 const destinations=[
   {id:'library',label:'Your library'},
@@ -24,23 +25,18 @@ function NavigationItems({current,onNavigate}){
 }
 
 function SonaShell(){
-  const [current,setCurrent]=useState('library');
+  const snapshot=useSyncExternalStore(sonaController.subscribe,sonaController.getSnapshot,sonaController.getSnapshot);
+  const current=snapshot.view;
   const [isMobileNavOpen,setMobileNavOpen]=useState(false);
-  useEffect(()=>{
-    const sync=event=>setCurrent(event.detail?.view||'library');
-    window.addEventListener('sona:view',sync);
-    return()=>window.removeEventListener('sona:view',sync);
-  },[]);
   const navigate=view=>{
-    setCurrent(view);
     setMobileNavOpen(false);
-    window.dispatchEvent(new CustomEvent('sona:navigate',{detail:{view}}));
+    sonaController.dispatch({type:'navigate',view});
   };
   const navItems=<NavigationItems current={current} onNavigate={navigate}/>;
-  const sideNav=<SideNav header={<SideNavHeading heading="Sona" subheading="v0.3.0 · a quieter kind of listening"/>}>{navItems}</SideNav>;
-  return <Theme theme={neutralTheme} mode="dark">
+  const sideNav=<SideNav resizable={{defaultWidth:288,minWidth:240,maxWidth:360,autoSaveId:'sona-side-nav'}} header={<SideNavHeading heading="Sona" subheading="v0.4.0 · a quieter kind of listening"/>}>{navItems}</SideNav>;
+  return <Theme theme={sonaTheme} mode="dark">
     <AppShell sideNav={sideNav} mobileNav={{breakpoint:'md',content:navItems,isOpen:isMobileNavOpen,onOpenChange:setMobileNavOpen}} variant="section" contentPadding={0}>
-      <section id="app" data-ui-system="astryx" data-migration-phase="navigation" />
+      <section id="app" data-ui-system="astryx" data-migration-phase="controller" />
     </AppShell>
     <output id="toast" role="status" aria-live="polite" />
     <section id="modal-root" />

@@ -2,6 +2,21 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-11-24
+
+### Added
+
+- An immutable React-facing controller for navigation and public application snapshots.
+- Production-entry integration tests for the React/Astryx shell and legacy engine synchronization.
+- Isolated, tested migration surfaces for library/intake, playback state, and voice providers.
+- A generated Sona Astryx theme with warmer type, roomier spacing, and muted sage accents.
+
+### Changed
+
+- Navigation no longer relies on browser-wide custom events.
+- The side navigation is larger and resizable, with its width saved locally.
+- Playback progress and cloud status publish independently from legacy rendering.
+
 ## [0.3.0] - 2026-11-24
 
 ### Added

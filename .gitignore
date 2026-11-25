@@ -2,3 +2,5 @@ node_modules/
 dist/
 .env*
 !.env.example
+themes/sona/*.html
+themes/sona/*.png
