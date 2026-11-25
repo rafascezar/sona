@@ -4,17 +4,23 @@ import {createRoot} from 'react-dom/client';
 import {AppShell} from '@astryxdesign/core/AppShell';
 import {SideNav,SideNavHeading,SideNavItem,SideNavSection} from '@astryxdesign/core/SideNav';
 import {Theme} from '@astryxdesign/core/theme';
+import {LayerProvider} from '@astryxdesign/core/Layer';
+import {Button} from '@astryxdesign/core/Button';
+import {Section} from '@astryxdesign/core/Section';
+import {Stack} from '@astryxdesign/core/Stack';
+import {Text} from '@astryxdesign/core/Text';
 import '@astryxdesign/core/reset.css';
 import '@astryxdesign/core/astryx.css';
-import {sonaTheme} from './themes/sona/sona.js';
-import './themes/sona/sona.fonts.css';
-import './themes/sona/sona.css';
+import {themes,defaultThemeSlug} from './astryx-themes.js';
 import {sonaController} from './sona-controller.js';
 import {Phase3Surface} from './react/Phase3Surface.jsx';
 import {PlayerView} from './react/PlayerView.jsx';
 import {QueueView} from './react/QueueView.jsx';
 import {VoicesView} from './voices/VoicesView.jsx';
 import {sonaVoiceController} from './voices/sona-voice-controller.js';
+import {FeedbackHost} from './react/FeedbackHost.jsx';
+import {LibraryTools} from './react/LibraryTools.jsx';
+import {startSonaEngine} from './sona-engine.js';
 
 const destinations=[
   {id:'library',label:'Your library'},
@@ -38,19 +44,29 @@ function SonaShell(){
     sonaController.dispatch({type:'navigate',view});
   };
   const navItems=<NavigationItems current={current} onNavigate={navigate}/>;
-  const sideNav=<SideNav resizable={{defaultWidth:288,minWidth:240,maxWidth:360,autoSaveId:'sona-side-nav'}} header={<SideNavHeading heading="Sona" subheading="v0.7.2 · a quieter kind of listening"/>}>{navItems}</SideNav>;
-  return <Theme theme={sonaTheme} mode="dark">
+  const sideNav=<SideNav resizable={{defaultWidth:288,minWidth:240,maxWidth:360,autoSaveId:'sona-side-nav'}} header={<SideNavHeading heading="Sona" subheading="v0.8.0 · a quieter kind of listening"/>}>{navItems}</SideNav>;
+  return <Theme theme={themes[defaultThemeSlug]} mode="dark">
+    <LayerProvider>
     <AppShell sideNav={sideNav} mobileNav={{breakpoint:'md',content:navItems,isOpen:isMobileNavOpen,onOpenChange:setMobileNavOpen}} variant="section" contentPadding={0}>
       {['library','add'].includes(current)?<Phase3Surface snapshot={snapshot} dispatch={sonaController.dispatch}/>:null}
       {current==='player'?<PlayerView snapshot={snapshot} dispatch={sonaController.dispatch}/>:null}
       {current==='queue'?<QueueView snapshot={snapshot} dispatch={sonaController.dispatch}/>:null}
-      {current==='voices'?<VoicesView controller={sonaVoiceController}/>:null}
-      <section id="app" hidden={['library','add','player','queue','voices'].includes(current)} data-ui-system="astryx" data-migration-phase="queue" />
+      {current==='voices'?<VoicesView controller={sonaVoiceController} onNotify={message=>sonaController.dispatch({type:'notify',message})}/>:null}
+      {current!=='player'&&snapshot.currentArticle?<Section padding={4}>
+        <Stack direction="horizontal" gap={3} align="center" justify="between" wrap="wrap">
+          <Text type="supporting">{snapshot.currentArticle.title}</Text>
+          <Stack direction="horizontal" gap={2}>
+            <Button label="Open player" variant="ghost" onClick={()=>navigate('player')}/>
+            <Button label={snapshot.playback.playing?'Pause':'Play'} onClick={()=>sonaController.dispatch({type:'toggle-playback'})}/>
+          </Stack>
+        </Stack>
+      </Section>:null}
+      {current==='library'?<LibraryTools snapshot={snapshot} dispatch={sonaController.dispatch}/>:null}
     </AppShell>
-    <output id="toast" role="status" aria-live="polite" />
-    <section id="modal-root" />
+    <FeedbackHost snapshot={snapshot} dispatch={sonaController.dispatch}/>
+    </LayerProvider>
   </Theme>;
 }
 
 flushSync(()=>createRoot(document.getElementById('root')).render(<SonaShell/>));
-await import('./app.js');
+startSonaEngine();

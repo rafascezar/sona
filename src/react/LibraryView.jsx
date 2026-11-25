@@ -12,6 +12,9 @@ import {SegmentedControl,SegmentedControlItem} from '@astryxdesign/core/Segmente
 import {Stack} from '@astryxdesign/core/Stack';
 import {Text} from '@astryxdesign/core/Text';
 import {TextInput} from '@astryxdesign/core/TextInput';
+import {Thumbnail} from '@astryxdesign/core/Thumbnail';
+
+const artSource=theme=>`/art/${['technology','care','landscape','growth','connection','discovery'].includes(theme)?theme:'growth'}.svg`;
 
 export function selectLibraryArticles(articles,{query='',filter='all'}={}){
   const needle=query.trim().toLocaleLowerCase();
@@ -37,6 +40,7 @@ function ArticleActions({article,dispatch}){
 function CurrentArticle({article,isPlaying,dispatch}){
   return <Card>
     <Stack gap={3}>
+      <Thumbnail src={artSource(article.theme)} alt={`Abstract ${article.theme||'growth'} artwork for ${article.title}`}/>
       <Text type="label" color="accent">{article.finished?'LISTEN AGAIN':'PICK UP WHERE YOU LEFT OFF'}</Text>
       <Heading level={2}>{article.title}</Heading>
       <Text type="supporting">{article.source||'Your library'} · {article.duration||1} min listen</Text>
@@ -77,7 +81,7 @@ export function LibraryView({snapshot,dispatch}){
           <Button label="Add article" variant="ghost" onClick={()=>dispatch({type:'navigate',view:'add'})}/>
         </Stack>
         {visible.length?<List hasDividers edge="outset" density="balanced">
-          {visible.map(article=><Item key={article.id} label={article.title} description={`${article.source||'Your library'} · ${article.duration||1} min${article.finished?' · Finished':''}`} onClick={()=>dispatch({type:'open-article',id:article.id})} endContent={<ArticleActions article={article} dispatch={dispatch}/>}/>) }
+          {visible.map(article=><Item key={article.id} label={article.title} description={`${article.source||'Your library'} · ${article.duration||1} min${article.finished?' · Finished':''}`} startContent={<Thumbnail src={artSource(article.theme)} alt=""/>} onClick={()=>dispatch({type:'open-article',id:article.id})} endContent={<ArticleActions article={article} dispatch={dispatch}/>}/>) }
         </List>:<EmptyState headingLevel={3} title={query?'Nothing here just yet.':'Your library starts here.'} description={query?'Try another title or source.':'Paste a link or bring your own words.'} actions={<Button label={query?'Clear search':'Add your first article'} variant="primary" onClick={()=>dispatch(query?{type:'set-query',query:''}:{type:'navigate',view:'add'})}/>}/>} 
       </Stack>
       <Text type="supporting">Five short Sona originals are included to try the player. Add your own reading whenever you’re ready.</Text>

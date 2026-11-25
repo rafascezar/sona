@@ -4,7 +4,9 @@
 
 Sona is a Cloudflare Worker application assembled with esbuild. The build embeds the frontend assets and approved artwork into `dist/server/index.js`, which exposes both the application shell and server API routes.
 
-The frontend uses plain HTML, CSS, and JavaScript. There is no client framework or separate asset server.
+The frontend uses React 19 and Astryx. `main.jsx` owns the application shell, page regions, layers and navigation. All visual components use the generated Sona Astryx theme. There is no hidden legacy DOM renderer or separate production asset server.
+
+`sona-engine.js` owns persistence, imports, cloud synchronization, speech and audio resources. It starts explicitly after React mounts and publishes immutable snapshots through `sona-controller.js`; React sends semantic commands through the same controller. API keys and audio tickets are excluded from public snapshots. Notifications and deletion confirmation are rendered through Astryx layers.
 
 ## Library and synchronization
 
@@ -62,6 +64,7 @@ Run:
 ```bash
 npm run build
 npm test
+npm run astryx:doctor
 ```
 
-The automated suite covers shared core functions, cloud synchronization, Google/Lire bridging, server routes, and a mocked browser runtime. Audible playback and mobile media controls still require a physical-device check with real provider credentials.
+The automated suite covers shared core functions, cloud synchronization, Google/Lire bridging, server routes, the independent engine and the actual React entry in a DOM harness. That harness has no layout engine. Audible playback, lock-screen controls, Bluetooth routing and background interruption recovery still require physical-device checks. The user confirmed cloud playback in Chrome on iPhone at v0.7.2; later engine refactors need the same confirmation.

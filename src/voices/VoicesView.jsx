@@ -39,7 +39,9 @@ function ConnectDialog({provider,isOpen,onOpenChange,controller,onNotify}){
     event.preventDefault();
     setError('');setSubmitting(true);
     try{
-      await controller.connect({provider,key,region:provider==='azure'?region:undefined});
+      const pending=controller.connect({provider,key,region:provider==='azure'?region:undefined});
+      setKey('');setRegion('');
+      await pending;
       close(false);
       onNotify?.(`${titles[provider]} connected.`);
     }catch(cause){
@@ -55,7 +57,7 @@ function ConnectDialog({provider,isOpen,onOpenChange,controller,onNotify}){
         <TextInput type="password" label={`${labels[provider]} API key`} value={key} onChange={setKey} isRequired autoComplete="off" hasAutoCorrect={false} hasSpellCheck={false} status={error?{type:'error',message:error}:undefined}/>
         {provider==='azure'?<TextInput label="Azure resource region" value={region} onChange={setRegion} isRequired placeholder="canadacentral" autoCapitalize="none" hasAutoCorrect={false} hasSpellCheck={false}/>:null}
       </FormLayout>
-      <Text as="p" type="supporting">The key is sent directly to the server and must never be stored in browser state, analytics, or global events.</Text>
+      <Text as="p" type="supporting">Your key is stored privately on the server and is never saved in your browser library.</Text>
       <Button label={`Connect ${titles[provider]}`} type="submit" variant="primary" isLoading={isSubmitting} isDisabled={!key||provider==='azure'&&!region}/>
     </Stack>
   </Dialog>;
@@ -82,13 +84,14 @@ export function VoicesView({controller,onNotify}){
   const needle=query.trim().toLocaleLowerCase();
   const voices=needle?snapshot.voices.filter(voice=>`${voice.name} ${voice.language} ${voice.description}`.toLocaleLowerCase().includes(needle)):snapshot.voices;
   const chooseProvider=next=>safeController.selectProvider(next).catch(cause=>onNotify?.(cause.message,'error'));
+  const refresh=()=>safeController.refresh().catch(cause=>onNotify?.(cause.message,'error'));
   const confirmDisconnect=async()=>{
     setDisconnecting(true);
     try{await safeController.disconnect(disconnectProvider);setDisconnectProvider('');onNotify?.(`${titles[disconnectProvider]} disconnected.`);}
     catch(cause){onNotify?.(cause.message||'Could not disconnect provider.','error');}
     finally{setDisconnecting(false);}
   };
-  return <Stack as="main" gap={5} padding={6} data-migration-phase="voices">
+  return <Stack as="section" gap={5} padding={6}>
     <Stack gap={1}>
       <Heading level={1}>Voices</Heading>
       <Text as="p" color="secondary">Find the voice that makes you want to stay with the story.</Text>
@@ -102,15 +105,15 @@ export function VoicesView({controller,onNotify}){
           <Heading level={2}>{titles[provider]}</Heading>
           <Text as="p" type="supporting">{allowances[provider]}</Text>
           <Text as="p"><StatusDot variant={providerState.isConnected?'success':'neutral'} label={providerState.isConnected?'Connected':'Not connected'}/> {providerState.isConnected?'Connected':'Not connected'}{providerState.isViaLire?' in Lire':''}</Text>
-          {!providerState.isConnected&&provider!=='device'?<Button label={provider==='google'?'Check Lire connection':`Connect ${titles[provider]}`} onClick={()=>provider==='google'?safeController.refresh():setConnectProvider(provider)} variant="primary"/>:null}
-          {providerState.isConnected&&provider!=='device'?<Button label={`Disconnect ${titles[provider]}`} onClick={()=>setDisconnectProvider(provider)} variant="ghost"/>:null}
+          {!providerState.isConnected&&provider!=='device'?<Button label={provider==='google'?'Check Lire connection':`Connect ${titles[provider]}`} onClick={()=>provider==='google'?refresh():setConnectProvider(provider)} variant="primary"/>:null}
+          {providerState.isConnected&&['azure','eleven'].includes(provider)?<Button label={`Disconnect ${titles[provider]}`} onClick={()=>setDisconnectProvider(provider)} variant="ghost"/>:null}
         </Stack>
       </Card>
-      {snapshot.error?<Banner status="error" title="Voice provider unavailable" description={snapshot.error} endContent={<Button label="Try again" onClick={()=>safeController.refresh()}/>}/>:null}
+      {snapshot.error?<Banner status="error" title="Voice provider unavailable" description={snapshot.error} endContent={<Button label="Try again" onClick={refresh}/>}/>:null}
       {providerState.isConnected?<TextInput type="search" label="Search voices" value={query} onChange={setQuery} isLabelHidden startIcon="search" hasClear enterKeyHint="search"/>:null}
       {snapshot.isLoading?<Spinner label="Loading voices"/>:providerState.isConnected&&voices.length?<List density="balanced" hasDividers header={<Heading level={2}>Available voices</Heading>}>
         {voices.map(voice=><Item key={voice.id} label={voice.name} description={[voice.language,voice.description].filter(Boolean).join(' · ')} isSelected={voice.id===snapshot.selectedVoiceId} onClick={()=>safeController.selectVoice(voice.id)} endContent={voice.id===snapshot.selectedVoiceId?<Text type="label">Selected</Text>:null}/>) }
-      </List>:providerState.isConnected?<EmptyState headingLevel={2} title={snapshot.voices.length?'No voices match your search':'No voices available yet'} description={snapshot.voices.length?'Try another name or language.':'Refresh the list or check the provider connection.'} actions={<Button label="Refresh voices" onClick={()=>safeController.refresh()}/>}/>:null}
+      </List>:providerState.isConnected?<EmptyState headingLevel={2} title={snapshot.voices.length?'No voices match your search':'No voices available yet'} description={snapshot.voices.length?'Try another name or language.':'Refresh the list or check the provider connection.'} actions={<Button label="Refresh voices" onClick={refresh}/>}/>:null}
     </Stack>
     {connectProvider?<ConnectDialog provider={connectProvider} isOpen onOpenChange={open=>!open&&setConnectProvider('')} controller={safeController} onNotify={onNotify}/>:null}
     <AlertDialog isOpen={Boolean(disconnectProvider)} onOpenChange={open=>!open&&setDisconnectProvider('')} title={`Disconnect ${disconnectProvider?titles[disconnectProvider]:'voice provider'}?`} description="Current provider voices will become unavailable. You can reconnect later." actionLabel="Disconnect" onAction={confirmDisconnect} isActionLoading={isDisconnecting}/>

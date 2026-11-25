@@ -93,7 +93,7 @@ Exit criteria:
 
 ## Phase 6 — Legacy removal and custom Sona theme
 
-Status: **in progress**
+Status: **implementation complete in v0.8.0; physical-device release sign-off pending**
 
 Goals:
 
@@ -106,3 +106,10 @@ Exit criteria:
 - No legacy DOM renderer remains.
 - `astryx doctor`, the automated suite, and production build pass.
 - Desktop and mobile playback receive a final physical-device check.
+
+## Remaining release checks
+
+- Repeat audible Chrome/iPhone playback after the v0.8.0 engine extraction (v0.7.2 was confirmed by the owner).
+- Test lock-screen controls, interruption recovery, background playback and audio-route changes on physical devices.
+- DOM integration tests cannot establish responsive layout, focus trapping, visual contrast or audible output; record browser and physical-device results separately.
+- Retain the 0.x version until these release checks are complete. The implementation milestones above do not imply that every physical-device scenario has been verified.

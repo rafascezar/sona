@@ -2,6 +2,15 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] - 2026-11-24
+
+- Removed the hidden imperative page renderer and legacy stylesheet; React/Astryx now owns every view, confirmation and notification.
+- Extracted a browser engine with explicit startup, immutable snapshots, semantic commands and cleanup.
+- Restored artwork, full read-along, bookmark navigation, explicit speed/timer choices, library sync and backup tools.
+- Registered the generated Sona theme through the official Astryx theme module.
+- Replaced tests of hidden legacy markup with engine and visible React integration checks.
+- Preserved Safari byte ranges and the iPhone gesture unlock confirmed in v0.7.2.
+
 ## [0.7.2] - 2026-11-24
 
 - Unlocks the iOS/WebKit media element synchronously during the Play gesture before cloud preparation begins.

@@ -1,8 +1,8 @@
-# Sona v0.7.2
+# Sona v0.8.0
 
 Sona is a private, personal reading and listening space for articles and saved text. It combines a calm reading interface, sentence-level read-along narration, a listening queue, and a cloud-synced library.
 
-The app is built as a Cloudflare Worker with a small HTML, CSS, and JavaScript frontend. It is currently deployed through OpenAI Sites.
+The app uses React 19 and the Astryx component library, bundled into a Cloudflare Worker and deployed through OpenAI Sites.
 
 ## Features
 
@@ -31,12 +31,16 @@ Provider credentials are validated on the server and stored in private per-user 
 
 ```text
 src/
-  app.js       Browser application and interaction logic
-  cloud.js     Cloud library synchronization
+  main.jsx     React/Astryx application shell
+  sona-engine.js Independent browser engine
+  sona-controller.js Immutable snapshots and semantic commands
+  react/       Library, intake, player, queue, feedback and tools
+  voices/      Voice UI and sanitized provider contract
+  themes/sona/ Generated Sona Astryx theme
+  cloud.js     Private library and narration API routes
   core.js      Shared parsing and reading utilities
   page.html    Application markup
   server.js    Cloudflare Worker routes and provider integrations
-  style.css    Responsive visual system
 public/art/    Approved artwork source
 tests/         Unit and runtime tests
 build.mjs      Worker bundle and asset build
@@ -68,7 +72,10 @@ Install dependencies, build, and run the test suite:
 npm ci
 npm run build
 npm test
+npm run astryx:doctor
 ```
+
+For a local browser preview, run `npm run dev` after building. Local preview has no private R2 binding; cloud providers are exercised on the hosted Site. Rebuild after source changes.
 
 The build produces a deployable Cloudflare Worker at `dist/server/index.js`. Generated files in `dist/` are intentionally excluded from version control.
 

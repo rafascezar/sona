@@ -36,10 +36,6 @@ async function productionApp(){
       setup(buildApi){
         buildApi.onResolve({filter:/\.css$/},args=>({path:args.path,namespace:'empty-style'}));
         buildApi.onLoad({filter:/.*/,namespace:'empty-style'},()=>({contents:'',loader:'js'}));
-        buildApi.onLoad({filter:/src\/main\.jsx$/},async args=>{
-          const source=await import('node:fs/promises').then(fs=>fs.readFile(args.path,'utf8'));
-          return {contents:source.replace("await import('./app.js');","import('./app.js');"),loader:'jsx'};
-        });
       }
     }]
   });
@@ -51,21 +47,21 @@ async function productionApp(){
 test('production entry mounts the React and Astryx navigation shell',async()=>{
   const {document}=await productionApp();
   assert.equal(document.querySelectorAll('#root').length,1);
-  assert.equal(document.querySelectorAll('[data-ui-system="astryx"]').length,1);
-  assert.equal(document.querySelector('[data-ui-system="astryx"]').dataset.migrationPhase,'queue');
+  assert.equal(document.querySelector('#app'),null,'the removed legacy mount must not return');
   assert.match(document.body.textContent,/Sona/);
   assert.match(document.body.textContent,/Your library/);
-  assert.match(document.querySelector('#app').textContent,/Something worth/);
+  assert.match(document.body.textContent,/Something worth/);
 });
 
-test('production React shell and legacy view stay synchronized in both directions',async()=>{
+test('production React shell and engine-driven views stay synchronized',async()=>{
   const {document,window}=await productionApp();
   const item=label=>[...document.querySelectorAll('button,a')].find(node=>node.textContent.trim()===label);
   const add=item('Add an article');
   assert.ok(add,'React navigation should expose Add an article');
   add.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
   await new Promise(resolve=>setTimeout(resolve,0));
-  assert.ok(document.querySelector('#import-form'));
+  assert.ok(document.querySelector('form'));
+  assert.match(document.body.textContent,/Paste text|From a URL|Choose a file/i);
 
   item('Listening queue').dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
   await new Promise(resolve=>setTimeout(resolve,0));
@@ -75,6 +71,6 @@ test('production React shell and legacy view stay synchronized in both direction
 
   item('Voices').dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
   await new Promise(resolve=>setTimeout(resolve,0));
-  assert.match(document.querySelector('#app').textContent,/Voices|narrator/i);
+  assert.match(document.body.textContent,/Voices|narrator/i);
   assert.equal(item('Voices').getAttribute('aria-current'),'page');
 });
