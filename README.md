@@ -1,4 +1,4 @@
-# Sona v0.1.1
+# Sona v0.2.0
 
 Sona is a private, personal reading and listening space for articles and saved text. It combines a calm reading interface, sentence-level read-along narration, a listening queue, and a cloud-synced library.
 
@@ -43,6 +43,7 @@ build.mjs      Worker bundle and asset build
 ```
 
 More implementation detail is available in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The progressive React/Astryx work is tracked in [docs/ASTRYX_MIGRATION.md](docs/ASTRYX_MIGRATION.md).
 
 ## Versioning
 

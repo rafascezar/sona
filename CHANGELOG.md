@@ -2,6 +2,21 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-11-24
+
+### Added
+
+- React 19 and Astryx Core as the new UI foundation.
+- Astryx neutral theme, embedded fonts, reset, and component styles in the Worker bundle.
+- A React compatibility shell that preserves the existing Sona application engine.
+- An incremental six-phase Astryx migration plan with explicit exit criteria.
+- Astryx CLI guidance and automated project health checks.
+
+### Changed
+
+- The browser entry point now mounts through React before loading the existing UI.
+- The build embeds Astryx CSS and fonts so the private Site remains self-contained.
+
 ## [0.1.1] - 2026-11-24
 
 ### Fixed
