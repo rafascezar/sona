@@ -2,6 +2,11 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.7.2] - 2026-11-24
+
+- Unlocks the iOS/WebKit media element synchronously during the Play gesture before cloud preparation begins.
+- Uses a short embedded silent WAV to preserve playback authorization while narration is prepared.
+
 ## [0.7.1] - 2026-11-24
 
 - Added HTTP byte-range responses for Google, Azure, and ElevenLabs narration so Safari/iOS can open ticketed audio reliably.
