@@ -2,6 +2,19 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] - 2026-11-24
+
+### Added
+
+- React/Astryx library, intake, player, queue, and voices surfaces.
+- Accessible provider tabs, credential dialogs, disconnect confirmation, and voice search.
+- React playback controls for seeking, speed, bookmarks, sleep timer, and read-along mode.
+
+### Changed
+
+- All primary views now use the generated Sona theme and controller snapshots.
+- The imperative renderer is hidden and retained only as a temporary engine adapter pending final removal.
+
 ## [0.4.0] - 2026-11-24
 
 ### Added

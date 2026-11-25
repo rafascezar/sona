@@ -48,7 +48,7 @@ Exit criteria:
 
 ## Phase 3 — Library and content intake
 
-Status: **in progress (v0.4.0 controller foundation)**
+Status: **complete in the React/Astryx shell**
 
 Goals:
 
@@ -64,7 +64,7 @@ Exit criteria:
 
 ## Phase 4 — Player and narration
 
-Status: planned
+Status: **complete in the React/Astryx shell**
 
 Goals:
 
@@ -79,7 +79,7 @@ Exit criteria:
 
 ## Phase 5 — Voices, dialogs, and feedback
 
-Status: planned
+Status: **complete in the React/Astryx shell**
 
 Goals:
 
@@ -93,7 +93,7 @@ Exit criteria:
 
 ## Phase 6 — Legacy removal and custom Sona theme
 
-Status: planned
+Status: **in progress**
 
 Goals:
 

@@ -10,13 +10,14 @@ async function productionApp(){
   const localStorage={getItem:key=>memory.get(key)||null,setItem:(key,value)=>memory.set(key,String(value)),removeItem:key=>memory.delete(key)};
   const speechSynthesis={getVoices:()=>[],cancel:()=>{},speak:()=>{},addEventListener:()=>{},removeEventListener:()=>{}};
   const raf=callback=>{const timer=setTimeout(()=>callback(Date.now()),0);timer.unref?.();return timer};
-  Object.assign(window,{speechSynthesis,scrollTo:()=>{},fetch:async()=>Response.json({error:'Unavailable'},{status:503}),requestAnimationFrame:raf,cancelAnimationFrame:clearTimeout,getComputedStyle:()=>({direction:'ltr',writingMode:'horizontal-tb',overflowX:'visible',overflowY:'visible'})});
+  const CSS={supports:()=>false,escape:value=>String(value)};
+  Object.assign(window,{CSS,speechSynthesis,scrollTo:()=>{},fetch:async()=>Response.json({error:'Unavailable'},{status:503}),requestAnimationFrame:raf,cancelAnimationFrame:clearTimeout,getComputedStyle:()=>({direction:'ltr',writingMode:'horizontal-tb',overflowX:'visible',overflowY:'visible'})});
   Object.assign(window.navigator,{mediaSession:{setActionHandler:()=>{}},userAgent:'node'});
   const context={
     window,document,navigator:window.navigator,location:window.location,localStorage,
     CustomEvent:window.CustomEvent,Event:window.Event,Node:window.Node,Element:window.Element,
     HTMLElement:window.HTMLElement,HTMLIFrameElement:window.HTMLIFrameElement,
-    MutationObserver:window.MutationObserver,getComputedStyle:()=>({direction:'ltr',writingMode:'horizontal-tb',overflowX:'visible',overflowY:'visible'}),
+    MutationObserver:window.MutationObserver,CSS,getComputedStyle:()=>({direction:'ltr',writingMode:'horizontal-tb',overflowX:'visible',overflowY:'visible'}),
     requestAnimationFrame:raf,cancelAnimationFrame:clearTimeout,
     SpeechSynthesisUtterance:class{constructor(text){this.text=text}},Audio:class{},MediaMetadata:class{constructor(data){Object.assign(this,data)}},
     Blob,URL,Response,Request,Headers,AbortController,crypto:globalThis.crypto,performance,
@@ -51,7 +52,7 @@ test('production entry mounts the React and Astryx navigation shell',async()=>{
   const {document}=await productionApp();
   assert.equal(document.querySelectorAll('#root').length,1);
   assert.equal(document.querySelectorAll('[data-ui-system="astryx"]').length,1);
-  assert.equal(document.querySelector('[data-ui-system="astryx"]').dataset.migrationPhase,'intake');
+  assert.equal(document.querySelector('[data-ui-system="astryx"]').dataset.migrationPhase,'queue');
   assert.match(document.body.textContent,/Sona/);
   assert.match(document.body.textContent,/Your library/);
   assert.match(document.querySelector('#app').textContent,/Something worth/);
