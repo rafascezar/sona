@@ -1,3 +1,9 @@
+# v0.8.1 validation
+
+- Build and all 45 automated tests passed; Astryx Doctor passed 27 checks with zero warnings/failures.
+- New mocked Media Session cases exercise exact in-chunk seconds, custom OS skip offsets, pause/seek/resume without a new request, backward transitions into a cached chunk, and seek-to handler cleanup.
+- Physical iPhone lock-screen verification remains pending. Unheard chunks lack measured timing; crossing into them still estimates the sentence boundary and prepares new audio. This release does not claim forced-aligned article-wide timestamps.
+
 # v0.8.0 validation
 
 - Production build: passed.

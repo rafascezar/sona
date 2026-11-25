@@ -13,7 +13,7 @@ function harness({saved,fetch:fetchOverride,Audio}={}){
   const handlers=new Map();
   const timers=new Set();
   const env={
-    localStorage:storage,crypto:{randomUUID:()=>`generated-${Math.random()}`},navigator:{onLine:true,mediaSession:{setActionHandler:(name,fn)=>handlers.set(name,fn)}},
+    localStorage:storage,crypto:{randomUUID:()=>`generated-${Math.random()}`},navigator:{onLine:true,mediaSession:{setActionHandler:(name,fn)=>handlers.set(name,fn),setPositionState:value=>handlers.set('position',value)}},
     location:{origin:'https://sona.test'},speechSynthesis:{getVoices:()=>[],cancel:()=>{},addEventListener:()=>{},removeEventListener:()=>{}},
     SpeechSynthesisUtterance:class{},MediaMetadata:class{constructor(value){Object.assign(this,value)}},Audio,
     addEventListener:()=>{},removeEventListener:()=>{},
@@ -135,4 +135,71 @@ test('premium playback keeps the synchronous iOS audio prime alive and aborts st
   await settle();
   assert.equal(operations.some(([,src])=>src==='/late.mp3'),false,'an aborted token must not attach or play stale audio');
   h.dispose();
+});
+
+async function playbackHarness(){
+  let audio,prepares=0;
+  const operations=[];
+  class AudioMock{
+    constructor(){audio=this;this.currentTime=0;this.duration=40;this.ended=false;this.playbackRate=1;}
+    set src(value){this.source=value;this.currentTime=0;}
+    get src(){return this.source;}
+    play(){operations.push(['play',this.src]);if(!this.src.startsWith('data:')){this.onloadedmetadata?.();this.onplaying?.();}return Promise.resolve();}
+    pause(){operations.push(['pause',this.src]);}
+    removeAttribute(){operations.push(['remove',this.src]);this.source='';}
+    load(){}
+  }
+  const fetcher=(url,options={})=>{
+    if(url==='/api/cloud/library')return response(options.method==='PUT'?{revision:'r1'}:{state:null,revision:null});
+    if(url==='/api/tts/status')return response({google:true});
+    if(url==='/api/eleven/status')return response({connected:false});
+    if(String(url).startsWith('/api/tts/voices'))return response({voices:[{id:'voice',name:'Voice'}]});
+    if(url==='/api/tts/prepare'){prepares++;const {start}=JSON.parse(options.body);return response({url:`/chunk-${start}.mp3`,start,end:Math.min(4,start+2),total:4});}
+    return response({},404);
+  };
+  const h=harness({saved:{articles:[article({text:'A first sentence. A second sentence. A third sentence. A fourth sentence.'})],queue:[],currentId:'old',audioEngine:'google',deleted:{}},fetch:fetcher,Audio:AudioMock});
+  h.controller.dispatch({type:'toggle-playback'});
+  assert.equal(await until(()=>operations.some(([name,src])=>name==='play'&&src==='/chunk-0.mp3')),true);
+  return {...h,audio,operations,prepares:()=>prepares};
+}
+
+test('lock-screen skip uses media seconds, honors seekOffset and retains the loaded source',async()=>{
+  const h=await playbackHarness();
+  const removed=h.operations.filter(([name])=>name==='remove').length;
+  h.audio.currentTime=24;
+  h.handlers.get('seekbackward')({seekOffset:15});
+  assert.equal(h.audio.currentTime,9);
+  h.handlers.get('seekforward')({seekOffset:7});
+  assert.equal(h.audio.currentTime,16);
+  h.controller.dispatch({type:'skip',direction:1});
+  assert.equal(h.audio.currentTime,31);
+  assert.equal(h.prepares(),1);
+  assert.equal(h.operations.filter(([name])=>name==='remove').length,removed);
+  assert.equal(h.handlers.get('position').position,31);
+  h.handlers.get('pause')();
+  const plays=h.operations.filter(([name])=>name==='play').length;
+  h.handlers.get('seekbackward')({});
+  assert.equal(h.audio.currentTime,16);
+  assert.equal(h.controller.getSnapshot().playback.playing,false);
+  assert.equal(h.operations.filter(([name])=>name==='play').length,plays);
+  await h.handlers.get('play')();
+  assert.equal(h.audio.currentTime,16);
+  assert.equal(h.prepares(),1);
+  h.dispose();
+});
+
+test('backward skip across a chunk boundary reuses the previous audio at its precise offset',async()=>{
+  const h=await playbackHarness();
+  h.audio.currentTime=40;h.audio.onended();
+  assert.equal(await until(()=>h.audio.src==='/chunk-2.mp3'),true);
+  h.audio.currentTime=8;
+  h.handlers.get('seekbackward')({seekOffset:15});
+  assert.equal(await until(()=>h.audio.src==='/chunk-0.mp3'),true);
+  assert.equal(h.audio.currentTime,33);
+  assert.equal(h.prepares(),2,'cached previous chunk should not synthesize again');
+  assert.equal(h.controller.getSnapshot().playback.playing,true);
+  h.handlers.get('seekto')({seekTime:12});
+  assert.equal(h.audio.currentTime,12);
+  h.dispose();
+  assert.equal(h.handlers.get('seekto'),null);
 });

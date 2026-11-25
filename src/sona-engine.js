@@ -4,7 +4,7 @@ import { sonaController } from "./sona-controller.js";
 import { starterArticles } from "./starter-articles.js";
 import { prepareArticleImport } from "./article-import.js";
 import { downloadText } from "./browser-download.js";
-const VERSION = "v0.8.0", VIEWS = /* @__PURE__ */ new Set(["library", "add", "queue", "voices", "player"]), PROVIDERS = /* @__PURE__ */ new Set(["google", "azure", "eleven", "device"]), RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
+const VERSION = "v0.8.1", VIEWS = /* @__PURE__ */ new Set(["library", "add", "queue", "voices", "player"]), PROVIDERS = /* @__PURE__ */ new Set(["google", "azure", "eleven", "device"]), RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
 const initial = (now) => ({ articles: starterArticles.map((article) => ({ ...article, position: 0, bookmarks: [], added: now })), queue: [], currentId: "attention", rate: 1, voiceURI: "", audioEngine: "google", autoplay: true, deleted: {} });
 function silentAudioSource(){
   const bytes=new Uint8Array(204),view=new DataView(bytes.buffer);
@@ -26,6 +26,8 @@ function startSonaEngine(options = {}) {
   let view = "library", query = "", filter = "all", importMode = "url", preview = null, busy = false, importError = "", readMode = false, playing = false, loading = false, timer = null, timerUntil = 0, notice = null, dialog = null, noticeId = 0;
   let cloudStatus = "Connecting to cloud\u2026", cloudReady = false, cloudSaving = false, cloudRevision = null, syncTimer, syncPromise=null, initPromise=null, cloudDirty=true, providers = { connected: false, google: false, azure: false }, catalog = { google: [], azure: [], eleven: [], device: [] }, voiceStatus = "idle", voiceError = "";
   let audio = typeof env.Audio === "function" ? new env.Audio() : null, abort = null, token = 0, unlocking = false, alive = true;
+  let activeSegment=null;
+  const segmentHistory=[];
   const cleanups = [], fingerprints = new Map(state.articles.map((a) => [a.id, JSON.stringify(a)]));
   if (audio) audio.playsInline = true;
   const current = () => state.articles.find((a) => a.id === state.currentId), progress = (a) => Math.round(clamp((a?.position || 0) / Math.max(1, sentences(a?.text || "").length), 0, 1) * 100);
@@ -73,17 +75,51 @@ function startSonaEngine(options = {}) {
     if (!a || !env.navigator?.mediaSession || !env.MediaMetadata) return;
     env.navigator.mediaSession.metadata = new env.MediaMetadata({ title: a.title, artist: a.author || a.source, album: `Sona ${VERSION} / Stillwater`, artwork: [{ src: (env.location?.origin || "") + "/art/" + a.theme + ".svg", type: "image/svg+xml" }] });
     env.navigator.mediaSession.playbackState = playing ? "playing" : "paused";
+    updateMediaPosition();
+  }
+  function updateMediaPosition(){
+    if(!audio||!activeSegment||!Number.isFinite(audio.duration)||audio.duration<=0)return;
+    try{env.navigator?.mediaSession?.setPositionState?.({duration:audio.duration,position:clamp(audio.currentTime||0,0,audio.duration),playbackRate:state.rate});}catch{}
+  }
+  function matchesSegment(segment){return segment&&segment.articleId===state.currentId&&segment.engine===state.audioEngine&&segment.voice===(state.audioEngine==='eleven'?state.elevenVoice:state[state.audioEngine+'Voice']);}
+  function updateSentence(){
+    const a=current(),segment=activeSegment;
+    if(!a||!matchesSegment(segment))return;
+    const parts=sentences(a.text),chunk=parts.slice(segment.start,segment.end);
+    const seconds=Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:segment.duration;
+    if(!seconds)return;
+    segment.duration=seconds;
+    const total=chunk.reduce((n,s)=>n+s.length,0),target=(audio.currentTime||0)/seconds*total;
+    let weight=0,index=segment.start;
+    for(const part of chunk){weight+=part.length;if(weight>=target)break;index++;}
+    const next=clamp(index,segment.start,segment.end-1);
+    if(a.position!==next){a.position=next;persist();}
+    updateMediaPosition();
+  }
+  function pausePlayback(){
+    if(audio&&matchesSegment(activeSegment)&&!loading){audio.pause();playing=false;media();publish();return;}
+    stop();
+  }
+  async function resumePlayback(){
+    if(audio&&matchesSegment(activeSegment)&&audio.src===activeSegment.url&&!audio.ended){
+      playing=true;audio.playbackRate=state.rate;publish();
+      try{await audio.play();media();}catch(e){playing=false;publish();notify(e.message);}
+      return;
+    }
+    return userPlay(current()?.position||0);
   }
   function stop() {
     token++;
     env.speechSynthesis?.cancel();
     abort?.abort();
     abort = null;
+    activeSegment=null;
     if (audio) {
       audio.onplaying = null;
       audio.ontimeupdate = null;
       audio.onended = null;
       audio.onerror = null;
+      audio.onloadedmetadata=null;
       try {audio.pause();audio.removeAttribute?.("src");audio.load?.();}catch{}
     }
     playing = false;
@@ -96,11 +132,13 @@ function startSonaEngine(options = {}) {
     env.speechSynthesis?.cancel();
     abort?.abort();
     abort = null;
+    activeSegment=null;
     if (audio) {
       audio.onplaying = null;
       audio.ontimeupdate = null;
       audio.onended = null;
       audio.onerror = null;
+      audio.onloadedmetadata=null;
     }
     playing = false;
     loading = false;
@@ -184,27 +222,37 @@ function startSonaEngine(options = {}) {
     run();
     return true;
   }
-  async function premium(index, isPrimed = false) {
+  async function premium(index, isPrimed = false, cachedSegment=null) {
     const engine = state.audioEngine, a = current();
     if (!audio || !a) return notify("Audio playback is unavailable in this browser.");
     if (!isPrimed) stop();
     const parts = sentences(a.text);
     a.position = clamp(index, 0, parts.length - 1);
     a.finished = false;
-    playing = true;
+    playing = cachedSegment?.resume!==false;
     loading = true;
     const guard = token, startId = a.id, Abort = env.AbortController || globalThis.AbortController, request = new Abort();
     abort = request;
     persist();
     try {
-      if (!catalog[engine].length && !await refreshVoices()) throw new Error(voiceError || "Choose a connected voice provider.");
-      if (!await syncCloud()) throw new Error("Wait for Cloud saved before starting premium narration.");
-      if(guard!==token||!alive)return false;
-      const r = await fetcher(engine === "eleven" ? "/api/eleven/prepare" : "/api/tts/prepare", { method: "POST", signal: request.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify(engine === "eleven" ? { articleId: startId, start: a.position, voice: state.elevenVoice, model: state.elevenModel } : { articleId: startId, start: a.position, voice: state[engine + "Voice"], provider: engine }) }), segment = await r.json();
-      if (!r.ok) throw new Error(segment.error || "Could not prepare narration.");
+      let segment=cachedSegment;
+      if(!segment){
+        if (!catalog[engine].length && !await refreshVoices()) throw new Error(voiceError || "Choose a connected voice provider.");
+        if (!await syncCloud()) throw new Error("Wait for Cloud saved before starting premium narration.");
+        if(guard!==token||!alive)return false;
+        const r = await fetcher(engine === "eleven" ? "/api/eleven/prepare" : "/api/tts/prepare", { method: "POST", signal: request.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify(engine === "eleven" ? { articleId: startId, start: a.position, voice: state.elevenVoice, model: state.elevenModel } : { articleId: startId, start: a.position, voice: state[engine + "Voice"], provider: engine }) });
+        segment=await r.json();if(!r.ok)throw new Error(segment.error||'Could not prepare narration.');
+      }
       if (guard !== token) return false;
       audio.src = segment.url;
+      activeSegment={...segment,url:audio.src,articleId:startId,engine,voice:engine==='eleven'?state.elevenVoice:state[engine+'Voice'],created:segment.created||now()};
+      segmentHistory.push(activeSegment);if(segmentHistory.length>30)segmentHistory.shift();
       audio.playbackRate = state.rate;
+      audio.onloadedmetadata=()=>{
+        if(guard!==token)return;
+        if(Number.isFinite(segment.offset))audio.currentTime=clamp(segment.offset,0,Math.max(0,audio.duration-.01));
+        updateSentence();
+      };
       audio.onplaying = () => {
         if (guard === token) {
           loading = false;
@@ -212,28 +260,14 @@ function startSonaEngine(options = {}) {
           publish();
         }
       };
-      audio.ontimeupdate = () => {
-        if (guard !== token) return;
-        const chunk = parts.slice(segment.start, segment.end), seconds = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : chunk.join(" ").split(/\s+/).length / 155 * 60, total = chunk.reduce((n, s) => n + s.length, 0), target = audio.currentTime / seconds * total;
-        let offset = 0, pos = segment.start;
-        for (const part of chunk) {
-          offset += part.length;
-          if (offset >= target) break;
-          pos++;
-        }
-        const active = current();
-        if (active?.id === startId && active.position !== pos) {
-          active.position = clamp(pos, segment.start, segment.end - 1);
-          persist();
-        }
-      };
+      audio.ontimeupdate=()=>{if(guard===token)updateSentence();};
       audio.onended = () => {
         if (guard !== token) return;
         const active = current();
         if (!active) return;
         active.position = segment.end;
         persist();
-        segment.end >= segment.total ? finish() : premium(segment.end);
+        if(segment.end>=segment.total)finish();else{cancelForPrime();premium(segment.end,true);}
       };
       audio.onerror = async () => {
         if(guard!==token)return;
@@ -241,7 +275,7 @@ function startSonaEngine(options = {}) {
         try {const failure=await fetcher(segment.url,{signal:request.signal});if(!failure.ok){const detail=await failure.json();if(detail.error)message=detail.error;}else await failure.body?.cancel();}catch{}
         if(guard===token){stop();notify(message);}
       };
-      await audio.play();
+      if(playing)await audio.play();else{loading=false;media();publish();}
       return true;
     } catch (e) {
       if (e.name === "AbortError" || guard !== token) return false;
@@ -256,8 +290,41 @@ function startSonaEngine(options = {}) {
     a.position = clamp(Number(position) || 0, 0, sentences(a.text).length - 1);
     a.finished = false;
     persist();
-    if (playing) play(a.position);
+    if(!loading&&matchesSegment(activeSegment)&&a.position>=activeSegment.start&&a.position<activeSegment.end&&Number.isFinite(audio.duration)&&audio.duration>0){
+      const parts=sentences(a.text),chunk=parts.slice(activeSegment.start,activeSegment.end),total=chunk.reduce((n,s)=>n+s.length,0),before=parts.slice(activeSegment.start,a.position).reduce((n,s)=>n+s.length,0);
+      audio.currentTime=audio.duration*before/Math.max(1,total);updateSentence();
+    }else if(playing){if(state.audioEngine==='device')device(a.position);else{cancelForPrime();audio?.pause();premium(a.position,true);}}else activeSegment=null;
     return true;
+  }
+  function skipSeconds(value){
+    const seconds=Number(value);if(!Number.isFinite(seconds)||!seconds)return false;
+    const a=current();if(!a)return false;
+    if(audio&&!loading&&matchesSegment(activeSegment)&&Number.isFinite(audio.duration)&&audio.duration>0){
+      const segment=activeSegment,target=(audio.currentTime||0)+seconds;
+      if(target>=0&&target<audio.duration){audio.currentTime=target;updateSentence();return true;}
+      const parts=sentences(a.text);
+      let remaining=target<0?target:target-audio.duration,boundary=target<0?segment.start:segment.end;
+      for(let step=0;step<30;step++){
+        const cached=[...segmentHistory].reverse().find(s=>matchesSegment(s)&&now()-s.created<10*60000&&Number.isFinite(s.duration)&&(remaining<0?s.end===boundary:s.start===boundary));
+        if(!cached)break;
+        const offset=remaining<0?cached.duration+remaining:remaining;
+        if((offset>=0&&offset<cached.duration)||(offset<0&&cached.start===0)||(offset>=cached.duration&&cached.end>=parts.length)){
+          const wasPlaying=playing;cancelForPrime();audio.pause();
+          premium(cached.start,true,{...cached,offset:clamp(offset,0,cached.duration-.01),resume:wasPlaying});return true;
+        }
+        remaining=offset<0?offset:offset-cached.duration;boundary=offset<0?cached.start:cached.end;
+      }
+      if(boundary===0&&remaining<0){audio.currentTime=0;updateSentence();return true;}
+      if(boundary>=parts.length&&remaining>=0){audio.currentTime=Math.max(0,audio.duration-.01);updateSentence();return true;}
+      // Unheard chunks have no measured duration yet; estimate only that remainder.
+      const chars=parts.slice(segment.start,segment.end).reduce((n,s)=>n+s.length,0),charOffset=remaining*chars/audio.duration;
+      let targetIndex=boundary,weight=0;
+      if(charOffset<0){while(targetIndex>0&&weight<-charOffset){targetIndex--;weight+=parts[targetIndex].length;}}
+      else{while(targetIndex<parts.length-1&&weight+parts[targetIndex].length<charOffset){weight+=parts[targetIndex].length;targetIndex++;}}
+      return seek(clamp(targetIndex,0,parts.length-1));
+    }
+    const parts=sentences(a.text),words=a.text.split(/\s+/).length/Math.max(1,parts.length),steps=Math.max(1,Math.round(Math.abs(seconds)/(words/(155*state.rate)*60)));
+    return seek((a.position||0)+(seconds<0?-steps:steps));
   }
   function loadDevice() {
     catalog.device = env.speechSynthesis?.getVoices() || [];
@@ -506,16 +573,13 @@ function startSonaEngine(options = {}) {
           return true;
         }
       case "toggle-playback":
-        if (playing) stop();
-        else userPlay(current()?.position || 0);
+        if (playing) pausePlayback();
+        else resumePlayback();
         return true;
       case "seek":
         return seek(c.position);
       case "skip": {
-        const a = current();
-        if (!a) return false;
-        const parts = sentences(a.text), words = a.text.split(/\s+/).length / parts.length, steps = Math.max(1, Math.round(15 / (words / (155 * state.rate) * 60)));
-        return seek((a.position || 0) + (c.direction < 0 ? -steps : steps));
+        return skipSeconds((c.direction<0?-1:1)*(Number.isFinite(c.seconds)&&c.seconds>0?c.seconds:15));
       }
       case "set-read-mode":
         readMode = !!c.readMode;
@@ -649,10 +713,13 @@ function startSonaEngine(options = {}) {
   env.addEventListener?.("beforeunload", unload);
   cleanups.push(() => env.removeEventListener?.("online", online), () => env.removeEventListener?.("focus", focus), () => env.removeEventListener?.("beforeunload", unload));
   if (env.navigator?.mediaSession) try {
-    env.navigator.mediaSession.setActionHandler("play", () => userPlay(current()?.position || 0));
-    env.navigator.mediaSession.setActionHandler("pause", stop);
-    env.navigator.mediaSession.setActionHandler("seekbackward", () => dispatch({ type: "skip", direction: -1 }));
-    env.navigator.mediaSession.setActionHandler("seekforward", () => dispatch({ type: "skip", direction: 1 }));
+    env.navigator.mediaSession.setActionHandler("play", resumePlayback);
+    env.navigator.mediaSession.setActionHandler("pause", pausePlayback);
+    env.navigator.mediaSession.setActionHandler("seekbackward", details => dispatch({ type: "skip", direction: -1, seconds:details?.seekOffset }));
+    env.navigator.mediaSession.setActionHandler("seekforward", details => dispatch({ type: "skip", direction: 1, seconds:details?.seekOffset }));
+    env.navigator.mediaSession.setActionHandler("seekto", details=>{
+      if(audio&&matchesSegment(activeSegment)&&Number.isFinite(details?.seekTime)&&Number.isFinite(audio.duration)){audio.currentTime=clamp(details.seekTime,0,audio.duration);updateSentence();}
+    });
   } catch {
   }
   publish();
@@ -672,7 +739,7 @@ function startSonaEngine(options = {}) {
     env.clearTimeout(timer);
     env.clearTimeout(syncTimer);
     for (const fn of cleanups) fn();
-    if (env.navigator?.mediaSession) for (const action of ["play", "pause", "seekbackward", "seekforward"]) try {
+    if (env.navigator?.mediaSession) for (const action of ["play", "pause", "seekbackward", "seekforward","seekto"]) try {
       env.navigator.mediaSession.setActionHandler(action, null);
     } catch {
     }

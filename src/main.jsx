@@ -44,7 +44,7 @@ function SonaShell(){
     sonaController.dispatch({type:'navigate',view});
   };
   const navItems=<NavigationItems current={current} onNavigate={navigate}/>;
-  const sideNav=<SideNav resizable={{defaultWidth:288,minWidth:240,maxWidth:360,autoSaveId:'sona-side-nav'}} header={<SideNavHeading heading="Sona" subheading="v0.8.0 · a quieter kind of listening"/>}>{navItems}</SideNav>;
+  const sideNav=<SideNav resizable={{defaultWidth:288,minWidth:240,maxWidth:360,autoSaveId:'sona-side-nav'}} header={<SideNavHeading heading="Sona" subheading="v0.8.1 · a quieter kind of listening"/>}>{navItems}</SideNav>;
   return <Theme theme={themes[defaultThemeSlug]} mode="dark">
     <LayerProvider>
     <AppShell sideNav={sideNav} mobileNav={{breakpoint:'md',content:navItems,isOpen:isMobileNavOpen,onOpenChange:setMobileNavOpen}} variant="section" contentPadding={0}>

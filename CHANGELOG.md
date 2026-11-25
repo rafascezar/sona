@@ -2,6 +2,14 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.8.1] - 2026-11-24
+
+- Lock-screen and in-app skip controls now seek in media seconds within the loaded audio instead of estimating a number of sentences and replacing the audio source.
+- Honor Media Session seek offsets and seek-to events; publish current position and playback rate.
+- Reuse previously heard chunks when crossing their boundaries. Unheard chunks still require an estimated sentence boundary and cloud preparation.
+- Pause and resume retain the loaded cloud audio and its exact position.
+- Added regression coverage for custom skip offsets, paused seeking, cached chunk transitions, and media handler cleanup.
+
 ## [0.8.0] - 2026-11-24
 
 - Removed the hidden imperative page renderer and legacy stylesheet; React/Astryx now owns every view, confirmation and notification.
