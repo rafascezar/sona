@@ -84,7 +84,7 @@ export function PlayerView({snapshot,dispatch}){
         <Button label={playback.playing?'Pause':'Play'} variant="primary" size="lg" width="6rem" onClick={()=>dispatch({type:'toggle-playback'})}/>
         <Stack gap={.5} align="center"><IconButton label="Forward 15 seconds" tooltip="Forward 15 seconds" size="lg" variant="ghost" icon={<Icon icon="chevronsRight"/>} onClick={()=>dispatch({type:'skip',direction:1})}/><Text type="supporting">15s</Text></Stack>
       </Stack>
-      <Grid columns={2} gap={3} width="100%">
+      <Grid columns={{minWidth:240,max:2}} gap={3} width="100%">
         <Selector label="Playback speed" width="100%" value={String(playback.rate||1)} options={rateOptions} onChange={rate=>dispatch({type:'set-rate',rate:Number(rate)})} variant="secondary" presentation="adaptive"/>
         <Selector label="Sleep timer" width="100%" value={String(snapshot.timerMinutes||0)} options={timerOptions} onChange={minutes=>dispatch({type:'set-timer',minutes:Number(minutes)})} variant="secondary" presentation="adaptive"/>
         <Button label={article.isBookmarked?'Bookmarked':'Bookmark'} width="100%" aria-pressed={article.isBookmarked} onClick={()=>dispatch({type:'bookmark'})}/>

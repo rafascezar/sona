@@ -2,6 +2,13 @@
 
 All notable changes to Sona are documented here. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.9.1] - 2026-11-25
+
+- Reflow the current-article summary and player option grid cleanly on narrow screens and at high browser zoom.
+- Replace clickable library and queue rows containing nested controls with explicit, independently labelled actions for reliable keyboard navigation.
+- Keep route headings programmatically focusable without forcing a large initial focus outline or moving focus away from navigation.
+- Preserve the v0.8.1 audio engine and private Site access unchanged.
+
 ## [0.9.0] - 2026-11-25
 
 - Reorganized the React/Astryx views around a shared padded content frame, with narrower import forms and a persistent compact player footer.

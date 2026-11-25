@@ -4,7 +4,7 @@ import { sonaController } from "./sona-controller.js";
 import { starterArticles } from "./starter-articles.js";
 import { prepareArticleImport } from "./article-import.js";
 import { downloadText } from "./browser-download.js";
-const VERSION = "v0.9.0", VIEWS = /* @__PURE__ */ new Set(["library", "add", "queue", "voices", "player"]), PROVIDERS = /* @__PURE__ */ new Set(["google", "azure", "eleven", "device"]), RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
+const VERSION = "v0.9.1", VIEWS = /* @__PURE__ */ new Set(["library", "add", "queue", "voices", "player"]), PROVIDERS = /* @__PURE__ */ new Set(["google", "azure", "eleven", "device"]), RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
 const initial = (now) => ({ articles: starterArticles.map((article) => ({ ...article, position: 0, bookmarks: [], added: now })), queue: [], currentId: "attention", rate: 1, voiceURI: "", audioEngine: "google", autoplay: true, deleted: {} });
 function silentAudioSource(){
   const bytes=new Uint8Array(204),view=new DataView(bytes.buffer);

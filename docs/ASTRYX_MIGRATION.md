@@ -111,6 +111,7 @@ Exit criteria:
 
 - Owner confirmed audible mobile playback after migration and working lock-screen skips in v0.8.1.
 - v0.9.0 reorganizes the responsive layouts and improves semantic controls; final live visual and accessibility review is still pending.
+- v0.9.1 completes a real desktop review and fixes narrow reflow, nested interactive rows and forced route-title focus. Owner-side mobile zoom, keyboard/dialog and screen-reader sign-off remain pending.
 - Test interruption recovery and audio-route changes on physical devices, and repeat background playback after the UI changes.
 - DOM integration tests cannot establish responsive layout, focus trapping, visual contrast or audible output; record browser and physical-device results separately.
 - Retain the 0.x version until these release checks are complete. The implementation milestones above do not imply that every physical-device scenario has been verified.

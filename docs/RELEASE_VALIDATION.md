@@ -1,3 +1,12 @@
+# v0.9.1 validation
+
+- Production desktop rendering was reviewed in the owner's authenticated Codex browser. The app frame, library lead, search/filter controls, current article, saved rows and persistent player footer rendered coherently at the captured 1234px-wide viewport.
+- Narrow layouts now stack the current-article artwork and reflow the player option grid instead of forcing two cramped columns. Library and queue rows use independent labelled controls rather than nesting buttons inside clickable rows.
+- Route headings remain programmatically focusable but are no longer focused automatically on every mount. This avoids an oversized initial focus outline while leaving navigation controls in a predictable focus position.
+- Production build and all 47 automated tests passed; Astryx Doctor passed 27 checks with zero warnings/failures.
+- The authenticated local browser session was visible but not controllable from this agent connection, so direct mobile resizing, 200% browser zoom, full keyboard traversal, dialog focus trapping and screen-reader testing remain owner-side checks. DOM tests are not counted as visual validation.
+- Audio engine behavior is unchanged from v0.8.1. The previously confirmed iPhone playback and lock-screen skips remain the applicable physical-device evidence; repeat them after this UI-only release when convenient.
+
 # v0.9.0 validation
 
 - Production build and all 47 automated tests passed; Astryx Doctor passed 27 checks with zero warnings/failures. TypeScript prop checking remains informational because TypeScript is not installed.

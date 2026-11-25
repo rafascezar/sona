@@ -12,6 +12,9 @@ import {Stack} from '@astryxdesign/core/Stack';
 import {Text} from '@astryxdesign/core/Text';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {Thumbnail} from '@astryxdesign/core/Thumbnail';
+import {Icon} from '@astryxdesign/core/Icon';
+import {IconButton} from '@astryxdesign/core/IconButton';
+import {useMediaQuery} from '@astryxdesign/core/hooks';
 import {ViewFrame} from './ViewFrame.jsx';
 
 const artSource=theme=>`/art/${['technology','care','landscape','growth','connection','discovery'].includes(theme)?theme:'growth'}.svg`;
@@ -38,9 +41,10 @@ function ArticleActions({article,dispatch}){
 }
 
 function CurrentArticle({article,isPlaying,dispatch}){
+  const compact=useMediaQuery('(max-width: 40rem)');
   return <Card>
     <Stack gap={3}>
-      <Stack direction="horizontal" gap={3} align="center">
+      <Stack direction={compact?'vertical':'horizontal'} gap={3} align={compact?'start':'center'}>
       <Thumbnail src={artSource(article.theme)} alt=""/>
       <Stack gap={2}>
       <Text type="label" color="accent">{article.finished?'LISTEN AGAIN':'PICK UP WHERE YOU LEFT OFF'}</Text>
@@ -84,7 +88,7 @@ export function LibraryView({snapshot,dispatch,tools}){
           <Button label="Add article" variant="ghost" onClick={()=>dispatch({type:'navigate',view:'add'})}/>
         </Stack>
         {visible.length?<List hasDividers edge="outset" density="balanced">
-          {visible.map(article=><Item key={article.id} label={article.title} labelLines={2} description={`${article.source||'Your library'} · ${article.duration||1} min${article.finished?' · Finished':''}`} startContent={<Thumbnail src={artSource(article.theme)} alt=""/>} onClick={()=>dispatch({type:'open-article',id:article.id})} endContent={<ArticleActions article={article} dispatch={dispatch}/>}/>) }
+          {visible.map(article=><Item key={article.id} label={article.title} labelLines={2} description={`${article.source||'Your library'} · ${article.duration||1} min${article.finished?' · Finished':''}`} startContent={<Thumbnail src={artSource(article.theme)} alt=""/>} endContent={<Stack direction="horizontal" gap={1} align="center"><IconButton label={`Open ${article.title}`} tooltip="Open article" variant="ghost" icon={<Icon icon="play"/>} onClick={()=>dispatch({type:'open-article',id:article.id})}/><ArticleActions article={article} dispatch={dispatch}/></Stack>}/>) }
         </List>:<EmptyState headingLevel={3} title={query?'Nothing here just yet.':'Your library starts here.'} description={query?'Try another title or source.':'Paste a link or bring your own words.'} actions={<Button label={query?'Clear search':'Add your first article'} variant="primary" onClick={()=>dispatch(query?{type:'set-query',query:''}:{type:'navigate',view:'add'})}/>}/>} 
       </Stack>
       <Text type="supporting">Five short Sona originals are included to try the player. Add your own reading whenever you’re ready.</Text>

@@ -7,7 +7,7 @@ export function ViewFrame({children,width=960}){
   const region=useRef(null);
   useEffect(()=>{
     const heading=region.current?.querySelector('h1');
-    if(heading){heading.tabIndex=-1;heading.focus?.();}
+    if(heading)heading.tabIndex=-1;
   },[]);
   return <Layout ref={region} height="auto" contentWidth={width} padding={wide?8:4}>
     <LayoutContent isScrollable={false}>{children}</LayoutContent>
